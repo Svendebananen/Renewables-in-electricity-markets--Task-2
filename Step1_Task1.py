@@ -31,21 +31,21 @@ p_DA = model.addVars(HOURS, lb=0, ub=P_NOM, name="p_DA")
 
 # compute balancing prices
 lambda_B = lambda_DA.copy() # copy to initialize balancing price matrix with the same structure as lambda_DA
-for ω in SCENARIOS:
+for omega in SCENARIOS:
     for h in HOURS:
-        if si.loc[ω, h] == 1: # if deficit, set balancing price to 1.25 times the day-ahead price 
-            lambda_B.loc[ω, h] = 1.25 * lambda_DA.loc[ω, h]
+        if si.loc[omega, h] == 1: # if deficit, set balancing price to 1.25 times the day-ahead price 
+            lambda_B.loc[omega, h] = 1.25 * lambda_DA.loc[omega, h]
         else: # if surplus, set balancing price to 0.85 times the day-ahead price
-            lambda_B.loc[ω, h] = 0.85 * lambda_DA.loc[ω, h]
+            lambda_B.loc[omega, h] = 0.85 * lambda_DA.loc[omega, h]
 
 # objective function (expected profit maximization)
 model.setObjective(
     gp.quicksum(
-        prob[ω] * (
-            lambda_DA.loc[ω, h] * p_DA[h] +
-            lambda_B.loc[ω, h]  * (wind_mw.loc[ω, h] - p_DA[h])
+        prob[omega] * (
+            lambda_DA.loc[omega, h] * p_DA[h] +
+            lambda_B.loc[omega, h]  * (wind_mw.loc[omega, h] - p_DA[h])
         )
-        for ω in SCENARIOS
+        for omega in SCENARIOS
         for h in HOURS
     ),
     GRB.MAXIMIZE
@@ -63,11 +63,11 @@ p_DA_values = {h: p_DA[h].X for h in HOURS}
 # hourly expected profit
 hourly_profit = {
     h: sum(
-        prob[ω] * (
-            lambda_DA.loc[ω, h] * p_DA_values[h] +
-            lambda_B.loc[ω, h]  * (wind_mw.loc[ω, h] - p_DA_values[h])
+        prob[omega] * (
+            lambda_DA.loc[omega, h] * p_DA_values[h] +
+            lambda_B.loc[omega, h]  * (wind_mw.loc[omega, h] - p_DA_values[h])
         )
-        for ω in SCENARIOS
+        for omega in SCENARIOS
     )
     for h in HOURS
 }
@@ -83,12 +83,12 @@ for h in HOURS:
 
 # Addressing "illustrate profit distribution across scenarios" 
 scenario_profit = {
-    ω: sum(
-        lambda_DA.loc[ω, h] * p_DA_values[h] +
-        lambda_B.loc[ω, h]  * (wind_mw.loc[ω, h] - p_DA_values[h])
+    omega: sum(
+        lambda_DA.loc[omega, h] * p_DA_values[h] +
+        lambda_B.loc[omega, h]  * (wind_mw.loc[omega, h] - p_DA_values[h])
         for h in HOURS
     )
-    for ω in SCENARIOS
+    for omega in SCENARIOS
 } 
 profits = list(scenario_profit.values()) # extract the profit for each scenario into a list for plotting
 profits_array = np.array(profits) # convert hourly profits to a numpy array for statistical analysis 
@@ -110,7 +110,7 @@ print(f"Median profit:      €{np.median(profits_array):.2f}")
 # plots
 plt.figure(figsize=(10, 5))
 plt.hist(profits, bins=50, color="#fa9537",edgecolor='white')
-expected_profit = sum(prob[ω] * scenario_profit[ω] for ω in SCENARIOS)
+expected_profit = sum(prob[omega] * scenario_profit[omega] for omega in SCENARIOS)
 
 plt.axvline(x=expected_profit, color='red', linestyle='--', linewidth=2, label=f' Total expected profit: €{expected_profit:,.0f}')
 plt.legend()

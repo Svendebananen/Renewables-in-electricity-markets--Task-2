@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 DIR = Path(__file__).parent
 DATA = DIR / "Data"
 PLOTS = DIR / "Step 1 Plots"
+
 # load combined scenarios
 scenarios = pd.read_csv(DATA / "Combined_scenarios.csv")
 
@@ -35,24 +36,24 @@ delta_up = model.addVars(SCENARIOS, HOURS, lb=0, ub=P_NOM, name="delta_high")
 lambda_B_up   = lambda_DA.copy()
 lambda_B_down = lambda_DA.copy()
 
-for ω in SCENARIOS:
+for omega in SCENARIOS:
     for h in HOURS:
-        if si.loc[ω, h] == 1:  # upward need
-            lambda_B_up.loc[ω, h] = lambda_DA.loc[ω, h]            # beneficial
-            lambda_B_down.loc[ω, h] = 1.25 * lambda_DA.loc[ω, h]  # harmful
+        if si.loc[omega, h] == 1:  # upward need
+            lambda_B_up.loc[omega, h] = lambda_DA.loc[omega, h]            # beneficial
+            lambda_B_down.loc[omega, h] = 1.25 * lambda_DA.loc[omega, h]   # harmful
         else:                  # downward need
-            lambda_B_up.loc[ω, h] = 0.85 * lambda_DA.loc[ω, h]     # harmful
-            lambda_B_down.loc[ω, h] = lambda_DA.loc[ω, h]          # beneficial
+            lambda_B_up.loc[omega, h] = 0.85 * lambda_DA.loc[omega, h]     # harmful
+            lambda_B_down.loc[omega, h] = lambda_DA.loc[omega, h]          # beneficial
 
 # objective function (expected profit maximization)
 model.setObjective(
     gp.quicksum(
-        prob[ω] * (
-            lambda_DA.loc[ω, h] * p_DA[h] +
-            lambda_B_up.loc[ω, h]  * delta_up[ω, h] -
-            lambda_B_down.loc[ω, h]  * delta_down[ω, h]
+        prob[omega] * (
+            lambda_DA.loc[omega, h] * p_DA[h] +
+            lambda_B_up.loc[omega, h]  * delta_up[omega, h] -
+            lambda_B_down.loc[omega, h]  * delta_down[omega, h]
         )
-        for ω in SCENARIOS
+        for omega in SCENARIOS
         for h in HOURS
     ),
     GRB.MAXIMIZE
@@ -60,26 +61,26 @@ model.setObjective(
 
 # constraints 
 # balance constraint for delta variables: the difference between upward and downward deviations must equal the difference between actual wind power and day-ahead offer
-for ω in SCENARIOS:
+for omega in SCENARIOS:
     for h in HOURS:
-        model.addConstr(delta_up[ω,h] - delta_down[ω,h] == wind_mw.loc[ω,h] - p_DA[h])
+        model.addConstr(delta_up[omega,h] - delta_down[omega,h] == wind_mw.loc[omega,h] - p_DA[h])
 
 
 # optimize model
 model.optimize() 
 # extract results
 p_DA_values = {h: p_DA[h].X for h in HOURS}
-delta_up_values = {(ω, h): delta_up[ω, h].X for ω in SCENARIOS for h in HOURS}
-delta_down_values = {(ω, h): delta_down[ω, h].X for ω in SCENARIOS for h in HOURS}
+delta_up_values = {(omega, h): delta_up[omega, h].X for omega in SCENARIOS for h in HOURS}
+delta_down_values = {(omega, h): delta_down[omega, h].X for omega in SCENARIOS for h in HOURS}
 # hourly expected profit
 hourly_profit = {
     h: sum(
-        prob[ω] * (
-            lambda_DA.loc[ω, h] * p_DA_values[h] +
-            lambda_B_up.loc[ω, h]   * delta_up_values[ω, h] -
-            lambda_B_down.loc[ω, h] * delta_down_values[ω, h]
+        prob[omega] * (
+            lambda_DA.loc[omega, h] * p_DA_values[h] +
+            lambda_B_up.loc[omega, h]   * delta_up_values[omega, h] -
+            lambda_B_down.loc[omega, h] * delta_down_values[omega, h]
         )
-        for ω in SCENARIOS
+        for omega in SCENARIOS
     )
     for h in HOURS
 }
@@ -95,13 +96,13 @@ for h in HOURS:
 
 # Addressing "illustrate profit distribution across scenarios" 
 scenario_profit = {
-    ω: sum(
-        lambda_DA.loc[ω, h] * p_DA_values[h] +
-        lambda_B_up.loc[ω, h]   * delta_up_values[ω, h] -
-        lambda_B_down.loc[ω, h] * delta_down_values[ω, h]
+    omega: sum(
+        lambda_DA.loc[omega, h] * p_DA_values[h] +
+        lambda_B_up.loc[omega, h]   * delta_up_values[omega, h] -
+        lambda_B_down.loc[omega, h] * delta_down_values[omega, h]
         for h in HOURS
     )
-    for ω in SCENARIOS
+    for omega in SCENARIOS
 }
 profits = list(scenario_profit.values()) # extract the profit for each scenario into a list for plotting
 profits_array = np.array(profits) # convert hourly profits to a numpy array for statistical analysis 
@@ -123,7 +124,7 @@ print(f"Median profit:      €{np.median(profits_array):.2f}")
 # plots
 plt.figure(figsize=(10, 5))
 plt.hist(profits, bins=50, color="#3fe60c",edgecolor='white')
-expected_profit = sum(prob[ω] * scenario_profit[ω] for ω in SCENARIOS)
+expected_profit = sum(prob[omega] * scenario_profit[omega] for omega in SCENARIOS)
 
 plt.axvline(x=expected_profit, color='red', linestyle='--', linewidth=2, label=f' Total expected profit: €{expected_profit:,.0f}')
 plt.legend()
