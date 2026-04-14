@@ -1,6 +1,7 @@
 import gurobipy as gp
 from gurobipy import GRB
 import pandas as pd
+import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt 
 
@@ -78,7 +79,9 @@ print(f"Hourly offers and profits:")
 for h in HOURS:
     print(f"  Hour {h:2d}: p_DA = {p_DA_values[h]:.2f} MW, profit = {hourly_profit[h]:.2f}")
 
-# illustrate profit distribution across scenarios 
+
+
+# Addressing "illustrate profit distribution across scenarios" 
 scenario_profit = {
     ω: sum(
         lambda_DA.loc[ω, h] * p_DA_values[h] +
@@ -87,8 +90,18 @@ scenario_profit = {
     )
     for ω in SCENARIOS
 } 
-profits = list(scenario_profit.values())
+profits = list(scenario_profit.values()) # extract the profit for each scenario into a list for plotting
+profits_array = np.array(profits) # convert hourly profits to a numpy array for statistical analysis 
 
+# statistical analysis of scenarios 
+print()
+print(f"Expected profit:    €{np.average(profits_array, weights=list(prob.loc[SCENARIOS])):.2f}")
+print(f"Standard deviation: €{np.std(profits_array):.2f}")
+print(f"Minimum profit:     €{profits_array.min():.2f}")
+print(f"Maximum profit:     €{profits_array.max():.2f}")
+print(f"Median profit:      €{np.median(profits_array):.2f}")
+
+# plots
 plt.figure(figsize=(10, 5))
 plt.hist(profits, bins=50, color="#fa9537",edgecolor='white')
 expected_profit = sum(prob[ω] * scenario_profit[ω] for ω in SCENARIOS)
