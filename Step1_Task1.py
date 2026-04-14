@@ -91,7 +91,7 @@ scenario_profit = {
 profits = list(scenario_profit.values())
 
 plt.figure(figsize=(10, 5))
-plt.hist(profits, bins=50, edgecolor='black')
+plt.hist(profits, bins=50, color="#d17219",edgecolor='white')
 plt.xlabel("Profit (€)")
 plt.ylabel("Number of scenarios")
 plt.title("Profit distribution across scenarios - One-price scheme")
