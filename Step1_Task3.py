@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import pathlib as path
 import matplotlib.pyplot as plt
+from adjustText import adjust_text
 
 DIR = path.Path(__file__).parent
 DATA = DIR / "Data" 
@@ -154,9 +155,13 @@ ax.plot([min_val - margin * 0.7, max_val + margin * 0.7],
         'r--', linewidth=1.5, label='Perfect generalization')
 
 # fold labels
+texts = []
 for i, row in results_df.iterrows():
-    ax.annotate(f"Fold {row['fold']}", (row['insample_profit'], row['outsample_profit']),
-                textcoords="offset points", xytext=(8, 4), fontsize=9)
+    texts.append(ax.annotate(f"Fold {int(row['fold']+1)}", 
+                             (row['insample_profit'], row['outsample_profit']),
+                             fontsize=12))
+
+adjust_text(texts, arrowprops=dict(arrowstyle='-', color='gray', lw=0.5))
 ax.set_aspect('equal', adjustable='box')
 ax.set_xlim(min_val - margin, max_val + margin)
 ax.set_ylim(min_val - margin, max_val + margin)
