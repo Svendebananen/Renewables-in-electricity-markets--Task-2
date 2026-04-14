@@ -1,11 +1,29 @@
+"""
+Generate combined scenarios for a stochastic offering strategy problem.
+
+Sources of uncertainty:
+  - Wind power production : 20 representative profiles (K-means clustering)
+  - Day-ahead price       : 20 representative profiles (K-means clustering)
+  - System imbalance      : 4 Bernoulli profiles (p = 0.5)
+
+Total combined scenarios : 1600 (20 x 20 x 4)
+Data source             : Renewables.ninja (wind), OPSD (prices), 2019 DK2
+
+Output files:
+  - Wind_scenarios.csv      : 20 wind profiles (days x hours)
+  - Price_scenarios.csv     : 20 price profiles (days x hours)
+  - Imbalance_scenarios.csv : 4 imbalance profiles (scenarios x hours)
+  - Combined_scenarios.csv  : 1600 combined scenarios (long format)
+"""
+
 import os
 os.environ['OMP_NUM_THREADS'] = '2'
-
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from itertools import product
 from sklearn.cluster import KMeans # for clustering scenarios to make the sampled one more representative of the full dataset
+
 
 SEED      = 42  # starting value for random number generation
 N_WIND    = 20  # number of wind scenarios to sample

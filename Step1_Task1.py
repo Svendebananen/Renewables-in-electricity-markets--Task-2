@@ -3,10 +3,11 @@ from gurobipy import GRB
 import pandas as pd
 import numpy as np
 from pathlib import Path
+import matplotlib.pyplot as plt 
 
 DIR = Path(__file__).parent
 DATA = DIR / "Data"
-
+PLOTS = DIR / "Step 1 Plots"
 # load combined scenarios
 scenarios = pd.read_csv(DATA / "Combined_scenarios.csv")
 
@@ -77,3 +78,23 @@ print(f"Total expected profit: {total_profit:.2f} €")
 print(f"Hourly offers and profits:")
 for h in HOURS:
     print(f"  Hour {h:2d}: p_DA = {p_DA_values[h]:.2f} MW, profit = {hourly_profit[h]:.2f}")
+
+# illustrate profit distribution across scenarios 
+scenario_profit = {
+    ω: sum(
+        lambda_DA.loc[ω, h] * p_DA_values[h] +
+        lambda_B.loc[ω, h]  * (wind_mw.loc[ω, h] - p_DA_values[h])
+        for h in HOURS
+    )
+    for ω in SCENARIOS
+} 
+profits = list(scenario_profit.values())
+
+plt.figure(figsize=(10, 5))
+plt.hist(profits, bins=50, edgecolor='black')
+plt.xlabel("Profit (€)")
+plt.ylabel("Number of scenarios")
+plt.title("Profit distribution across scenarios - One-price scheme")
+plt.tight_layout()
+plt.savefig(PLOTS / "Task1.1_profit_distribution.png", dpi=150)
+plt.show()
