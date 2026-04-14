@@ -1,7 +1,6 @@
 import gurobipy as gp
 from gurobipy import GRB
 import pandas as pd
-import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt 
 
@@ -91,7 +90,11 @@ scenario_profit = {
 profits = list(scenario_profit.values())
 
 plt.figure(figsize=(10, 5))
-plt.hist(profits, bins=50, color="#d17219",edgecolor='white')
+plt.hist(profits, bins=50, color="#fa9537",edgecolor='white')
+expected_profit = sum(prob[ω] * scenario_profit[ω] for ω in SCENARIOS)
+
+plt.axvline(x=expected_profit, color='red', linestyle='--', linewidth=2, label=f' Total expected profit: €{expected_profit:,.0f}')
+plt.legend()
 plt.xlabel("Profit (€)")
 plt.ylabel("Number of scenarios")
 plt.title("Profit distribution across scenarios - One-price scheme")

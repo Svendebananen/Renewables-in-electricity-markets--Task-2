@@ -1,4 +1,4 @@
-# Renewables in electricity markets Assignment 2
+# Renewables in electricity markets: Assignment 2
 
 * Step 1:
 - Electricity prices have been extracted from https://data.open-power-system-data.org/time_series/, since
