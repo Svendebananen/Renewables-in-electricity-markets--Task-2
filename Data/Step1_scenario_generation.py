@@ -1,3 +1,6 @@
+import os
+os.environ['OMP_NUM_THREADS'] = '2'
+
 import numpy as np
 import pandas as pd
 from pathlib import Path
