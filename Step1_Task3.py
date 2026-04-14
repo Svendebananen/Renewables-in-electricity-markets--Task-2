@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 DIR = path.Path(__file__).parent
 DATA = DIR / "Data" 
+PLOTS = DIR / "Step 1 Plots"
 
 # load combined scenarios
 scenarios = pd.read_csv(DATA / "Combined_scenarios.csv")
@@ -23,8 +24,8 @@ HOURS       = range(N_HOURS)
 SCENARIOS = list(wind_mw.index) 
 
 # compute balancing prices
-lambda_B_up   = lambda_DA.copy()
-lambda_B_down = lambda_DA.copy()
+lambda_B_up   = lambda_DA.copy() # copy to initialize balancing price matrix with the same structure as lambda_DA
+lambda_B_down = lambda_DA.copy() # copy to initialize balancing price matrix with the same structure as lambda_DA
 
 for omega in SCENARIOS:
     for h in HOURS:
@@ -35,10 +36,10 @@ for omega in SCENARIOS:
             lambda_B_up.loc[omega, h] = 0.85 * lambda_DA.loc[omega, h]     # harmful
             lambda_B_down.loc[omega, h] = lambda_DA.loc[omega, h]          # beneficial
 
-def solve_two_price(scenarios_subset):
+def solve_two_price(scenarios_subset,prob_subset): # defining the two-price solver function that will be used in each fold of the cross-validation
     
     model = gp.Model("two_price")
-    model.setParam('OutputFlag', 0)
+    model.setParam('OutputFlag', 0) # suppress Gurobi output for cleaner output during cross-validation
     
     p_DA       = model.addVars(HOURS, lb=0, ub=P_NOM, name="p_DA")
     delta_up   = model.addVars(scenarios_subset, HOURS, lb=0, ub=P_NOM, name="delta_up")
@@ -46,7 +47,7 @@ def solve_two_price(scenarios_subset):
 
     model.setObjective(
         gp.quicksum(
-            prob[omega] * (
+            prob_subset[omega] * (
                 lambda_DA.loc[omega, h] * p_DA[h] +
                 lambda_B_up.loc[omega, h]   * delta_up[omega, h] -
                 lambda_B_down.loc[omega, h] * delta_down[omega, h]
@@ -79,11 +80,11 @@ folds = np.array_split(scenario_ids, N_FOLDS) # generate a list of 8 arrays, eac
 results = []
 
 for fold_idx in range(N_FOLDS):
-    insample  = folds[fold_idx]
-    outsample = np.concatenate([folds[i] for i in range(N_FOLDS) if i != fold_idx])
-    prob_insample = prob[insample] / prob[insample].sum()
-    prob_outsample = prob[outsample] / prob[outsample].sum()
-    p_DA_values = solve_two_price(insample)
+    insample  = folds[fold_idx] # in-sample scenario ids for the current fold
+    outsample = np.concatenate([folds[i] for i in range(N_FOLDS) if i != fold_idx]) #out-of-sample scecario ids for the current fold
+    prob_insample = prob[insample] / prob[insample].sum() # normalize probabilities for in-sample scenarios to sum to 1
+    prob_outsample = prob[outsample] / prob[outsample].sum() # normalize probabilities for out-of-sample scenarios to sum to 1
+    p_DA_values = solve_two_price(insample, prob_insample) # solve the two-price model using only the in-sample scenarios
 
     # in-sample profit to compare with out-of-sample profit later
     insample_profit = sum(
@@ -114,7 +115,7 @@ for fold_idx in range(N_FOLDS):
     )
 
     # out-of-sample imbalance cost
-    outsample_profit = da_profit + outsample_average_imbalance_cost
+    outsample_profit = da_profit + outsample_average_imbalance_cost # total out-of-sample profit is the sum of day-ahead profit and imbalance cost (which can be positive or negative)
 
     results.append({
     'fold':              fold_idx,
@@ -127,12 +128,39 @@ for fold_idx in range(N_FOLDS):
 results_df = pd.DataFrame(results)
 
 # comparison
-avg_insample_da_profit  = results_df['da_profit'].mean()
-avg_insample_profit = results_df['insample_profit'].mean()
-avg_outsample_profit = results_df['outsample_profit'].mean()
+avg_insample_da_profit  = results_df['da_profit'].mean()      # average day-ahead profit across folds
+avg_insample_profit = results_df['insample_profit'].mean()    # average in-sample profit across folds
+avg_outsample_profit = results_df['outsample_profit'].mean()  # average out-of-sample profit across folds (ex-post profit of K-fold cross validation)
 
-print(f"Average out-of-sample profit: €{avg_outsample_profit:,.2f}")
-print(f"Average in-sample profit:    €{avg_insample_profit:,.2f}")
-print(f"Average in-sample DA profit: €{avg_insample_da_profit:,.2f}")
+print(f"Average out-of-sample profit: {avg_outsample_profit:,.2f}€")
+print(f"Average in-sample profit:    {avg_insample_profit:,.2f}€")
+print(f"Average in-sample DA profit: {avg_insample_da_profit:,.2f}€")
 print()
 print(results_df.to_string(index=False))
+
+
+# scatter plot of in-sample vs out-of-sample profit for each fold
+fig, ax = plt.subplots(figsize=(7, 7))
+
+ax.scatter(results_df['insample_profit'], results_df['outsample_profit'], 
+           color='steelblue', s=100, zorder=5)
+
+# diagonal reference line
+min_val = min(results_df['insample_profit'].min(), results_df['outsample_profit'].min())
+max_val = max(results_df['insample_profit'].max(), results_df['outsample_profit'].max())
+ax.plot([min_val, max_val], [min_val, max_val], 'r--', linewidth=1.5, label='Perfect generalization')
+
+# fold labels
+for i, row in results_df.iterrows():
+    ax.annotate(f"Fold {row['fold']}", (row['insample_profit'], row['outsample_profit']),
+                textcoords="offset points", xytext=(8, 4), fontsize=9)
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlim(min_val * 0.99, max_val * 1.01)
+ax.set_ylim(min_val * 0.99, max_val * 1.01)
+ax.set_xlabel("In-sample profit (€)")
+ax.set_ylabel("Out-of-sample profit (€)")
+ax.set_title("In-sample vs Out-of-sample profit - 8-fold cross-validation")
+ax.legend()
+plt.tight_layout()
+plt.savefig(PLOTS / "Task1.3_crossvalidation_scatter.png", dpi=150)
+plt.show()
