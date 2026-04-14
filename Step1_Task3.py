@@ -69,7 +69,7 @@ def solve_two_price(scenarios_subset,prob_subset): # defining the two-price solv
 
 # 8-fold cross-validation 
 N_FOLDS    = 8    # number of folds for cross-validation
-N_INSAMPLE = 200  # number of scenarios in the in-sample set for each fold
+N_INSAMPLE = 400  # number of scenarios in the in-sample set for each fold
 
 
 np.random.seed(42)
@@ -148,19 +148,40 @@ ax.scatter(results_df['insample_profit'], results_df['outsample_profit'],
 # diagonal reference line
 min_val = min(results_df['insample_profit'].min(), results_df['outsample_profit'].min())
 max_val = max(results_df['insample_profit'].max(), results_df['outsample_profit'].max())
-ax.plot([min_val, max_val], [min_val, max_val], 'r--', linewidth=1.5, label='Perfect generalization')
+margin = (max_val - min_val) * 0.5
+ax.plot([min_val - margin * 0.7, max_val + margin * 0.7], 
+        [min_val - margin * 0.7, max_val + margin * 0.7], 
+        'r--', linewidth=1.5, label='Perfect generalization')
 
 # fold labels
 for i, row in results_df.iterrows():
     ax.annotate(f"Fold {row['fold']}", (row['insample_profit'], row['outsample_profit']),
                 textcoords="offset points", xytext=(8, 4), fontsize=9)
 ax.set_aspect('equal', adjustable='box')
-ax.set_xlim(min_val * 0.99, max_val * 1.01)
-ax.set_ylim(min_val * 0.99, max_val * 1.01)
+ax.set_xlim(min_val - margin, max_val + margin)
+ax.set_ylim(min_val - margin, max_val + margin)
 ax.set_xlabel("In-sample profit (€)")
 ax.set_ylabel("Out-of-sample profit (€)")
 ax.set_title("In-sample vs Out-of-sample profit - 8-fold cross-validation")
 ax.legend()
 plt.tight_layout()
 plt.savefig(PLOTS / "Task1.3_crossvalidation_scatter.png", dpi=150)
+plt.show()
+
+# bar plot
+x = np.arange(N_FOLDS)
+width = 0.35
+
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.bar(x - width/2, results_df['insample_profit'],  width, label='In-sample',  color='steelblue')
+ax.bar(x + width/2, results_df['outsample_profit'], width, label='Out-of-sample', color='orange')
+
+ax.set_xlabel('Fold')
+ax.set_ylabel('Profit (€)')
+ax.set_title('In-sample vs Out-of-sample profit per fold')
+ax.set_xticks(x)
+ax.set_xticklabels([f'Fold {i}' for i in range(N_FOLDS)])
+ax.legend()
+plt.tight_layout()
+plt.savefig(PLOTS / "Task1.3_crossvalidation_barplot.png", dpi=150)
 plt.show()
