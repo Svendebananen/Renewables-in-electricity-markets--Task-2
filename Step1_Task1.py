@@ -94,11 +94,17 @@ profits = list(scenario_profit.values()) # extract the profit for each scenario 
 profits_array = np.array(profits) # convert hourly profits to a numpy array for statistical analysis 
 
 # statistical analysis of scenarios 
+min_val = profits_array.min()      # Min profit
+max_val = profits_array.max()      # Max profit
+range_val = max_val - min_val      # range of profits             
+
 print()
+print(f"Range: €{range_val:,.2f}")
 print(f"Expected profit:    €{np.average(profits_array, weights=list(prob.loc[SCENARIOS])):.2f}")
 print(f"Standard deviation: €{np.std(profits_array):.2f}")
-print(f"Minimum profit:     €{profits_array.min():.2f}")
-print(f"Maximum profit:     €{profits_array.max():.2f}")
+print(f"Std Dev / Range: {np.std(profits_array) / range_val:.1%}")
+print(f"Minimum profit:     €{min_val:,.2f}")
+print(f"Maximum profit:     €{max_val:,.2f}")
 print(f"Median profit:      €{np.median(profits_array):.2f}")
 
 # plots
