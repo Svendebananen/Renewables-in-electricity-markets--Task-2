@@ -11,10 +11,10 @@ DATA = DIR / "Data"
 scenarios = pd.read_csv(DATA / "Combined_scenarios.csv")
 
 # pivot to matrix format (scenarios x hours)
-wind_mw    = scenarios.pivot(index='scenario_id', columns='hour', values='wind_mw')
-lambda_DA  = scenarios.pivot(index='scenario_id', columns='hour', values='da_price')
-si         = scenarios.pivot(index='scenario_id', columns='hour', values='si')
-prob       = scenarios.drop_duplicates('scenario_id').set_index('scenario_id')['prob']
+wind_mw    = scenarios.pivot(index='scenario_id', columns='hour', values='wind_mw') # pivot the 'wind_mw' column to create a matrix where rows are scenarios and columns are hours, with the values being the wind power in MW for each scenario and hour
+lambda_DA  = scenarios.pivot(index='scenario_id', columns='hour', values='da_price') # pivot the 'da_price' column to create a matrix where rows are scenarios and columns are hours, with the values being the day-ahead price for each scenario and hour
+si         = scenarios.pivot(index='scenario_id', columns='hour', values='si') # pivot the 'si' column to create a matrix where rows are scenarios and columns are hours, with the values being the imbalance indicator (1 for deficit, 0 for surplus) for each scenario and hour
+prob       = scenarios.drop_duplicates('scenario_id').set_index('scenario_id')['prob'] # extract the probability of each scenario by dropping duplicate rows based on 'scenario_id', setting 'scenario_id' as the index, and selecting the 'prob' column
 
 # parameters
 P_NOM       = 500 # nominal power of the wind turbine in MW
@@ -32,7 +32,7 @@ p_DA = model.addVars(HOURS, lb=0, ub=P_NOM, name="p_DA")
 lambda_B = lambda_DA.copy() # copy to initialize balancing price matrix with the same structure as lambda_DA
 for ω in SCENARIOS:
     for h in HOURS:
-        if si.loc[ω, h] == 1: # if deficit, set balancing price to 1.25 times the day-ahead price
+        if si.loc[ω, h] == 1: # if deficit, set balancing price to 1.25 times the day-ahead price 
             lambda_B.loc[ω, h] = 1.25 * lambda_DA.loc[ω, h]
         else: # if surplus, set balancing price to 0.85 times the day-ahead price
             lambda_B.loc[ω, h] = 0.85 * lambda_DA.loc[ω, h]
