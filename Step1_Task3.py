@@ -68,24 +68,24 @@ def solve_two_price(scenarios_subset,prob_subset): # defining the two-price solv
     p_DA_values = {h: p_DA[h].X for h in HOURS}
     return p_DA_values
 
-# 8-fold cross-validation 
-N_FOLDS    = 8    # number of folds for cross-validation
-N_INSAMPLE = 400  # number of scenarios in the in-sample set for each fold
+# 8-fold cross-validation
+N_FOLDS = 8  # number of folds for cross-validation
+N_SCENARIOS_PER_FOLD = len(SCENARIOS) // N_FOLDS  # 200 scenarios per fold
 
 
 np.random.seed(42)
 scenario_ids = np.array(SCENARIOS)
 np.random.shuffle(scenario_ids)
-folds = np.array_split(scenario_ids, N_FOLDS) # generate a list of 8 arrays, each containig 200 scenario ids
+folds = np.array_split(scenario_ids, N_FOLDS)  # generate 8 arrays with 200 scenario ids each
 
 results = []
 
 for fold_idx in range(N_FOLDS):
-    insample  = folds[fold_idx] # in-sample scenario ids for the current fold
-    outsample = np.concatenate([folds[i] for i in range(N_FOLDS) if i != fold_idx]) #out-of-sample scecario ids for the current fold
-    prob_insample = prob[insample] / prob[insample].sum() # normalize probabilities for in-sample scenarios to sum to 1
-    prob_outsample = prob[outsample] / prob[outsample].sum() # normalize probabilities for out-of-sample scenarios to sum to 1
-    p_DA_values = solve_two_price(insample, prob_insample) # solve the two-price model using only the in-sample scenarios
+    insample = folds[fold_idx]  # in-sample scenario ids for the current fold
+    outsample = np.concatenate([folds[i] for i in range(N_FOLDS) if i != fold_idx])  # out-of-sample scenario ids for the current fold
+    prob_insample = prob[insample] / prob[insample].sum()  # normalize probabilities for in-sample scenarios to sum to 1
+    prob_outsample = prob[outsample] / prob[outsample].sum()  # normalize probabilities for out-of-sample scenarios to sum to 1
+    p_DA_values = solve_two_price(insample, prob_insample)  # solve the two-price model using only the in-sample scenarios
 
     # in-sample profit to compare with out-of-sample profit later
     insample_profit = sum(
