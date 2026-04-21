@@ -1,84 +1,25 @@
-import gurobipy as gp
-from gurobipy import GRB
-import pandas as pd
 import numpy as np
-from pathlib import Path
-import matplotlib.pyplot as plt 
+from step1.data import (
+    wind_mw, lambda_DA, si, prob, SCENARIOS, HOURS, PLOTS
+)
+from step1.models import compute_balancing_prices_two, solve_two_price
+from step1.plots import plot_profit_histogram
 
-DIR = Path(__file__).parent
-DATA = DIR / "Data"
-PLOTS = DIR / "Step 1 Plots"
+# compute two-price balancing prices
+lambda_B_up, lambda_B_down = compute_balancing_prices_two(lambda_DA, si)
 
-# load combined scenarios
-scenarios = pd.read_csv(DATA / "Combined_scenarios.csv")
+# solve two-price model (beta=0: pure expected-profit maximisation)
+p_DA_values, scenario_profit, _ = solve_two_price(
+    SCENARIOS, prob, wind_mw, lambda_DA, lambda_B_up, lambda_B_down, verbose=True
+)
 
-# pivot to matrix format (scenarios x hours)
-wind_mw    = scenarios.pivot(index='scenario_id', columns='hour', values='wind_mw') # pivot the 'wind_mw' column to create a matrix where rows are scenarios and columns are hours, with the values being the wind power in MW for each scenario and hour
-lambda_DA  = scenarios.pivot(index='scenario_id', columns='hour', values='da_price') # pivot the 'da_price' column to create a matrix where rows are scenarios and columns are hours, with the values being the day-ahead price for each scenario and hour
-si         = scenarios.pivot(index='scenario_id', columns='hour', values='si') # pivot the 'si' column to create a matrix where rows are scenarios and columns are hours, with the values being the imbalance indicator (1 for deficit, 0 for surplus) for each scenario and hour
-prob       = scenarios.drop_duplicates('scenario_id').set_index('scenario_id')['prob'] # extract the probability of each scenario by dropping duplicate rows based on 'scenario_id', setting 'scenario_id' as the index, and selecting the 'prob' column
-
-# parameters
-P_NOM       = 500 # nominal power of the wind turbine in MW
-N_HOURS     = 24  # number of hours in a day
-HOURS       = range(N_HOURS) 
-SCENARIOS = list(wind_mw.index)
-
-# build model
-model = gp.Model("task1_2_prices")
-
-# decision variables
-p_DA = model.addVars(HOURS, lb=0, ub=P_NOM, name="p_DA") 
-delta_down = model.addVars(SCENARIOS, HOURS, lb=0, ub=P_NOM, name="delta_low")
-delta_up = model.addVars(SCENARIOS, HOURS, lb=0, ub=P_NOM, name="delta_high") 
-
-# compute balancing prices
-lambda_B_up   = lambda_DA.copy()
-lambda_B_down = lambda_DA.copy()
-
-for omega in SCENARIOS:
-    for h in HOURS:
-        if si.loc[omega, h] == 1:  # upward need
-            lambda_B_up.loc[omega, h] = lambda_DA.loc[omega, h]            # beneficial
-            lambda_B_down.loc[omega, h] = 1.25 * lambda_DA.loc[omega, h]   # harmful
-        else:                  # downward need
-            lambda_B_up.loc[omega, h] = 0.85 * lambda_DA.loc[omega, h]     # harmful
-            lambda_B_down.loc[omega, h] = lambda_DA.loc[omega, h]          # beneficial
-
-# objective function (expected profit maximization)
-model.setObjective(
-    gp.quicksum(
-        prob[omega] * (
-            lambda_DA.loc[omega, h] * p_DA[h] +
-            lambda_B_up.loc[omega, h]  * delta_up[omega, h] -
-            lambda_B_down.loc[omega, h]  * delta_down[omega, h]
-        )
-        for omega in SCENARIOS
-        for h in HOURS
-    ),
-    GRB.MAXIMIZE
-) 
-
-# constraints 
-# balance constraint for delta variables: the difference between upward and downward deviations must equal the difference between actual wind power and day-ahead offer
-for omega in SCENARIOS:
-    for h in HOURS:
-        model.addConstr(delta_up[omega,h] - delta_down[omega,h] == wind_mw.loc[omega,h] - p_DA[h])
-
-
-# optimize model
-model.optimize() 
-# extract results
-p_DA_values = {h: p_DA[h].X for h in HOURS}
-delta_up_values = {(omega, h): delta_up[omega, h].X for omega in SCENARIOS for h in HOURS}
-delta_down_values = {(omega, h): delta_down[omega, h].X for omega in SCENARIOS for h in HOURS}
 # hourly expected profit
 hourly_profit = {
     h: sum(
         prob[omega] * (
-            lambda_DA.loc[omega, h] * p_DA_values[h] +
-            lambda_B_up.loc[omega, h]   * delta_up_values[omega, h] -
-            lambda_B_down.loc[omega, h] * delta_down_values[omega, h]
+            lambda_DA.loc[omega, h]     * p_DA_values[h] +
+            lambda_B_up.loc[omega, h]   * max(wind_mw.loc[omega, h] - p_DA_values[h], 0) -
+            lambda_B_down.loc[omega, h] * max(p_DA_values[h] - wind_mw.loc[omega, h], 0)
         )
         for omega in SCENARIOS
     )
@@ -88,29 +29,15 @@ hourly_profit = {
 total_profit = sum(hourly_profit.values())
 
 print(f"Total expected profit: {total_profit:.2f} €")
-print(f"Hourly offers and profits:")
+print("Hourly offers and profits:")
 for h in HOURS:
     print(f"  Hour {h:2d}: p_DA = {p_DA_values[h]:.2f} MW, profit = {hourly_profit[h]:.2f}")
 
-
-
-# Addressing "illustrate profit distribution across scenarios" 
-scenario_profit = {
-    omega: sum(
-        lambda_DA.loc[omega, h] * p_DA_values[h] +
-        lambda_B_up.loc[omega, h]   * delta_up_values[omega, h] -
-        lambda_B_down.loc[omega, h] * delta_down_values[omega, h]
-        for h in HOURS
-    )
-    for omega in SCENARIOS
-}
-profits = list(scenario_profit.values()) # extract the profit for each scenario into a list for plotting
-profits_array = np.array(profits) # convert hourly profits to a numpy array for statistical analysis 
-
-# statistical analysis of scenarios 
-min_val = profits_array.min()      # Min profit
-max_val = profits_array.max()      # Max profit
-range_val = max_val - min_val      # range of profits             
+# statistical analysis of scenarios
+profits_array = np.array(list(scenario_profit.values()))
+min_val   = profits_array.min()
+max_val   = profits_array.max()
+range_val = max_val - min_val
 
 print()
 print(f"Range: €{range_val:,.2f}")
@@ -121,16 +48,10 @@ print(f"Minimum profit:     €{min_val:,.2f}")
 print(f"Maximum profit:     €{max_val:,.2f}")
 print(f"Median profit:      €{np.median(profits_array):.2f}")
 
-# plots
-plt.figure(figsize=(10, 5))
-plt.hist(profits, bins=50, color="#3fe60c",edgecolor='white')
-expected_profit = sum(prob[omega] * scenario_profit[omega] for omega in SCENARIOS)
-
-plt.axvline(x=expected_profit, color='red', linestyle='--', linewidth=2, label=f' Total expected profit: €{expected_profit:,.0f}')
-plt.legend()
-plt.xlabel("Profit (€)")
-plt.ylabel("Number of scenarios")
-plt.title("Profit distribution across scenarios - Two-prices scheme")
-plt.tight_layout()
-plt.savefig(PLOTS / "Task1.2_profit_distribution.png", dpi=150)
-plt.show()
+# plot profit distribution
+plot_profit_histogram(
+    scenario_profit, prob,
+    title="Profit distribution across scenarios - Two-price scheme",
+    save_path=PLOTS / "Task1.2_profit_distribution.png",
+    color="#3fe60c"
+)
