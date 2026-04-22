@@ -19,7 +19,12 @@ def main():
 
     # 2. Solve ALSO-X and CVaR for ε=0.1
     x_also = solve_also_x_gurobi(in_sample, epsilon=0.1)
+    elapsed = time.time() - start_time
+    print(f"Total runtime ALSO-X: {elapsed:.2f} seconds")
+    start_time = time.time()
     x_cvar = solve_cvar_gurobi(in_sample,   epsilon=0.1)
+    elapsed = time.time() - start_time
+    print(f"Total runtime CVar: {elapsed:.2f} seconds")
 
     # 3. Print optimal bids
     print("Optimal bids:")
@@ -61,8 +66,7 @@ def main():
     )
 
     # 7. Print total runtime
-    elapsed = time.time() - start_time
-    print(f"Total runtime: {elapsed:.2f} seconds")
+    
 
 if __name__ == "__main__":
     main()
