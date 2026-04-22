@@ -70,37 +70,47 @@ def solve_cvar_gurobi(
     output_flag: int = 0,
 ) -> float:
     """Solve CVaR LP and return the optimal upward reserve bid."""
+    
     arr, m_count, omega = _validate_inputs(profiles, epsilon)
-    total_minutes = m_count * omega
+    total_samples = m_count * omega
 
     model = gp.Model("cvar")
     model.setParam("OutputFlag", output_flag)
 
+    # Variables
     c_up = model.addVar(lb=0.0, name="c_up")
-    beta = model.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, name="beta")
+    beta = model.addVar(lb=-GRB.INFINITY, name="beta")  # VaR
     zeta = model.addVars(m_count, omega, lb=0.0, name="zeta")
 
+    # Objective
     model.setObjective(c_up, GRB.MAXIMIZE)
 
     model.addConstrs(
         (
-            zeta[mp, w] >= c_up - float(arr[mp, w]) - beta
-            for mp in range(m_count)
+            zeta[m, w] >= c_up - float(arr[m, w]) - beta
+            for m in range(m_count)
             for w in range(omega)
         ),
-        name="zeta_lower",
+        name="shortfall",
     )
 
+    
     model.addConstr(
-        beta + (1 / (epsilon * total_minutes))
-        * gp.quicksum(zeta[mp, w] for mp in range(m_count) for w in range(omega))
+        beta + (1.0 / (epsilon * total_samples)) *
+        gp.quicksum(zeta[m, w] for m in range(m_count) for w in range(omega))
         <= 0,
-        name="cvar",
+        name="cvar_constraint",
     )
 
     model.optimize()
+
+    
     if model.status != GRB.OPTIMAL:
-        raise RuntimeError("CVaR solver failed")
+        raise RuntimeError("CVar solver failed")
 
     return float(c_up.X)
+
+    r
+
+
 

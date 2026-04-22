@@ -52,7 +52,7 @@ def main():
               f"({rate:.2f}%), avg shortfall {shortfall:.2f} kW")
     print()
 
-    # 6. Save results for Step 2.2
+    # 6. Save results 
     np.savez(
         "bids_results.npz",
         x_also=x_also,
