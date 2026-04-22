@@ -59,16 +59,29 @@ def generate_load_scenarios(
     num_scenarios: int = NUM_SCENARIOS,
     num_steps: int = NUM_STEPS,
     seed: int = DEFAULT_SEED,
-  ) -> np.ndarray:
+) -> np.ndarray:
     """Generate a scenario matrix with shape (num_scenarios, num_steps + 1)."""
     rng = random.Random(seed)
     profiles = np.zeros((num_scenarios, num_steps + 1), dtype=float)
 
     for scenario_idx in range(num_scenarios):
-      scenario = generate_scenario(rng)
-      profiles[scenario_idx, :] = [load for _, load in scenario]
+        scenario = generate_scenario(rng)
+        profiles[scenario_idx, :] = [load for _, load in scenario]
 
     return profiles
+
+
+def generate_load_scnenarios(
+    num_scenarios: int = NUM_SCENARIOS,
+    num_steps: int = NUM_STEPS,
+    seed: int = DEFAULT_SEED,
+) -> np.ndarray:
+    """Compatibility wrapper for misspelled function name."""
+    return generate_load_scenarios(
+        num_scenarios=num_scenarios,
+        num_steps=num_steps,
+        seed=seed,
+    )
 
 
 def main(seed: int = DEFAULT_SEED) -> None:
