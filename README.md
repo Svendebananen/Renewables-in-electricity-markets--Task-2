@@ -12,5 +12,8 @@
   The wind farm is bidding 100% of its full capacity in the DA if the sum of all scenarios Prob * (lambda_DA - lambda_B) is positive, otherwise it bids 0. E.g. if we expect that the balancing price is > than the DA price, it's better for us leave th whole production for the balancing market, in which we are going to be remunerated with a factor that is 1.25 higher than in the DA.
 
 * Step 2
-- Maybe the generate_load_scenarios.py should be deleted. So we just have the csv file. 
-    -> i think we should keep it anyways in a separate folder to show how we obtained them
+Functions and Data
+-Generate_load_scenarios creates random 300 profiles, reproducibility attained by using seed
+- Step2_solvers: Gurobi solvers for alsox and cvar that can be imported in the steps for steps2
+
+Step 2: Generate profiles and use 100  profiles to determine the optimal FCR-D UP reserve bid (in kW) satisfying Energinet’s P90 requirement by using both ALSO-X and CVaR. Verify of the P90 requiremnte by using the 200 out of sample loads.  

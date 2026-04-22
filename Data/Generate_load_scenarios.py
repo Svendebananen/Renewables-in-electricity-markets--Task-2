@@ -1,5 +1,6 @@
 """
-Generate 300 random load scenarios for a Participation in Ancillary Service Markets model.
+Generate random load scenarios for a Participation in Ancillary Service Markets model
+for a single hour.
 
 Constraints:
   - Load range      : 220 kW to 600 kW
@@ -8,11 +9,12 @@ Constraints:
 
 Output: load_scenarios.csv
   Columns: Scenario, Time, Load
-  Each scenario has 61 rows (one per minute from 12:00 to 13:00).
 """
 
 import random
 import csv
+import argparse
+import numpy as np
 from datetime import datetime, timedelta
 
 # ── Constants ──────────────────────────────────────────────────────────────────
@@ -23,9 +25,10 @@ MAX_DELTA = 35          # kW per minute
 START_TIME = datetime(2000, 1, 1, 12, 0)   # 12:00 (date is arbitrary)
 NUM_STEPS = 60          # minutes (produces 61 time points: 12:00 … 13:00)
 OUTPUT_FILE = "load_scenarios.csv"
+DEFAULT_SEED = 30
 
 
-def generate_scenario() -> list[tuple[str, int]]:
+def generate_scenario(rng: random.Random) -> list[tuple[str, int]]:
     """
     Generate a single load scenario that satisfies:
       - Load stays within [LOAD_MIN, LOAD_MAX]
@@ -35,7 +38,7 @@ def generate_scenario() -> list[tuple[str, int]]:
     time_str follows the '%H:%M' format (e.g. '12:00', '12:01', …, '13:00').
     """
     # Pick a random starting load within the allowed range
-    load = random.randint(LOAD_MIN, LOAD_MAX)
+    load = rng.randint(LOAD_MIN, LOAD_MAX)
     scenario: list[tuple[str, int]] = []
 
     for step in range(NUM_STEPS + 1):          # 0 … 60 inclusive
@@ -47,24 +50,50 @@ def generate_scenario() -> list[tuple[str, int]]:
             # Determine the reachable range for the next minute
             lo = max(LOAD_MIN, load - MAX_DELTA)
             hi = min(LOAD_MAX, load + MAX_DELTA)
-            load = random.randint(lo, hi)
+            load = rng.randint(lo, hi)
 
     return scenario
 
 
-def main() -> None:
+def generate_load_scenarios(
+    num_scenarios: int = NUM_SCENARIOS,
+    num_steps: int = NUM_STEPS,
+    seed: int = DEFAULT_SEED,
+  ) -> np.ndarray:
+    """Generate a scenario matrix with shape (num_scenarios, num_steps + 1)."""
+    rng = random.Random(seed)
+    profiles = np.zeros((num_scenarios, num_steps + 1), dtype=float)
+
+    for scenario_idx in range(num_scenarios):
+      scenario = generate_scenario(rng)
+      profiles[scenario_idx, :] = [load for _, load in scenario]
+
+    return profiles
+
+
+def main(seed: int = DEFAULT_SEED) -> None:
     """Generate NUM_SCENARIOS scenarios and write them to OUTPUT_FILE."""
+    rng = random.Random(seed)
+
     with open(OUTPUT_FILE, "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["Scenario", "Time", "Load"])
 
         for scenario_num in range(1, NUM_SCENARIOS + 1):
-            scenario = generate_scenario()
+            scenario = generate_scenario(rng)
             for time_str, load in scenario:
                 writer.writerow([scenario_num, time_str, load])
 
-    print(f"Generated {NUM_SCENARIOS} scenarios → {OUTPUT_FILE}")
+    print(f"Generated {NUM_SCENARIOS} scenarios with seed {seed} → {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Generate random load scenarios.")
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=DEFAULT_SEED,
+        help=f"Random seed for reproducible scenarios (default: {DEFAULT_SEED})",
+    )
+    args = parser.parse_args()
+    main(seed=args.seed)
