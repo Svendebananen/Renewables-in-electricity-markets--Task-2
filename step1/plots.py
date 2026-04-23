@@ -38,6 +38,49 @@ def plot_profit_histogram(scenario_profit, prob, title, save_path, color="#fa953
     plt.savefig(save_path, dpi=150)
     plt.show()
 
+def plot_Mean_Wind_Generation_And_DA_Price(wind_mw, lambda_One_Price_DA, lambda_Two_Price_DA, hours, save_path, color = "#fa9537"):
+    """
+    Plot of mean wind generation and day-ahead price across hours.
+
+    Parameters
+    ----------
+    wind_mw   : DataFrame of wind power realisations (scenarios × hours)
+    lambda_One_Price_DA : DataFrame of one-price day-ahead prices (scenarios × hours)
+    lambda_Two_Price_DA : DataFrame of two-price day-ahead prices (scenarios × hours)
+    hours     : list of hour IDs to include in the plot
+    save_path : Path-like – file to save the figure to
+    color     : str – line colour for wind generation
+    """
+    hours = list(hours)
+    mean_wind = wind_mw[hours].mean()
+
+    def _hourly_values(values):
+        if isinstance(values, pd.DataFrame):
+            if set(hours).issubset(values.columns):
+                return values[hours].mean()
+            return values.mean(axis=0).reindex(hours)
+        if isinstance(values, pd.Series):
+            return values.reindex(hours)
+        return pd.Series(values).reindex(hours)
+
+    price_one = _hourly_values(lambda_One_Price_DA)
+    price_two = _hourly_values(lambda_Two_Price_DA)
+
+    fig, ax1 = plt.subplots(figsize=(10, 5))
+
+    ax1.set_xlabel('Hour of Day')
+    ax1.set_ylabel('Power (MW)', color=color)
+    ax1.plot(hours, mean_wind, marker='o', color=color, label='Mean Wind Generation (MW)')
+    ax1.plot(hours, price_one.values, marker='s', color='steelblue', label='One-Price Day-Ahead Price')
+    ax1.plot(hours, price_two.values, marker='^', color='darkgreen', label='Two-Price Day-Ahead Price')
+    ax1.tick_params(axis='y', labelcolor=color)
+    ax1.legend(loc='upper left')
+
+    plt.title('Mean Wind Generation and Day-Ahead Price Across Hours')
+    fig.tight_layout()
+    plt.savefig(save_path, dpi=150)
+    plt.show()
+
 
 def plot_cvar_frontier(frontier_df, title, save_path):
     """
