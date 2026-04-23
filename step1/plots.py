@@ -109,6 +109,41 @@ def plot_cvar_frontier(frontier_df, title, save_path):
     plt.show()
 
 
+def plot_cvar_frontier_With_Both_Models(frontier_single_price_df, frontier_two_price_df, title, save_path):
+    """
+    Scatter/line plot of expected profit vs CVaR for a beta sweep.
+
+    Parameters
+    ----------
+    frontier_single_price_df : DataFrame with columns ['beta', 'expected_profit', 'cvar']
+    frontier_two_price_df    : DataFrame with columns ['beta', 'expected_profit', 'cvar']
+    title                    : str – plot title
+    save_path                : Path-like – file to save the figure to
+    """
+    plt.figure(figsize=(10, 5))
+    plt.plot(frontier_single_price_df["cvar"], frontier_single_price_df["expected_profit"],
+             marker="o", color="#1f77b4", label="Single-Price Model")
+    plt.plot(frontier_two_price_df["cvar"], frontier_two_price_df["expected_profit"],
+             marker="s", color="#ff7f0e", label="Two-Price Model")
+    for _, row in frontier_single_price_df.iterrows():
+        plt.annotate(
+            f"beta={row['beta']:.2f}",
+            (row["cvar"], row["expected_profit"]),
+            textcoords="offset points", xytext=(5, 5)
+        )
+    for _, row in frontier_two_price_df.iterrows():
+        plt.annotate(
+            f"beta={row['beta']:.2f}",
+            (row["cvar"], row["expected_profit"]),
+            textcoords="offset points", xytext=(5, 5)
+        )
+    plt.xlabel("CVaR (alpha = 0.90)")
+    plt.ylabel("Expected Profit (€)")
+    plt.title(title)
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=150)
+    plt.show()
+
 def plot_crossvalidation(results_df, save_path_scatter, save_path_bar):
     """
     Two plots for k-fold cross-validation results:

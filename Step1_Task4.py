@@ -7,7 +7,7 @@ from step1.models import (
     compute_balancing_prices_one, compute_balancing_prices_two,
     solve_one_price, solve_two_price,
 )
-from step1.plots import plot_profit_histogram, plot_cvar_frontier
+from step1.plots import plot_cvar_frontier_With_Both_Models, plot_profit_histogram, plot_cvar_frontier
 
 ALPHA       = 0.9
 BETA_VALUES = [0.0, 0.25, 0.5, 0.75, 1.0]
@@ -166,4 +166,9 @@ plot_cvar_frontier(
     frontier_two_df,
     title="Expected Profit vs CVaR Trade-off - Two-price scheme",
     save_path=PLOTS / "Task1.4_two_price_profit_cvar_tradeoff.png",
+)
+
+
+plot_cvar_frontier_With_Both_Models(
+    frontier_one_df, frontier_two_df, "Expected Profit vs CVaR Trade-off - Both Models", PLOTS / "Task1.4_both_models_profit_cvar_tradeoff.png"
 )
