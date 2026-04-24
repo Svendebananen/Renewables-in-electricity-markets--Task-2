@@ -1,12 +1,14 @@
 import numpy as np
 import time
 import os
+import pandas as pd
 from Data.Step2_solvers import solve_also_x_gurobi, solve_cvar_gurobi
 from Data.Generate_load_scenarios import generate_load_scenarios
 
 ############################################################################
 ### Main execution: generate data, solve models, evaluate & save results ###
 ############################################################################
+
 def main():
     start_time = time.time()
 
@@ -68,13 +70,85 @@ def main():
     # 6. Save results 
     
     np.savez(
-    os.path.join("data", "bids_results.npz"),
+    os.path.join("Results","Step 2", "bids_results.npz"),
     x_also=x_also,
     x_cvar=x_cvar,
     out_sample=out_sample
 )
 
-    
+    # 7. P90 sensitivity analysis (ALSO-X only)
+
+
+    epsilons = np.linspace(0., 0.2, 11)  # 0.2=80%, 0.0=100%
+
+    bids_also = []
+    violation_rate_in = []
+    violation_rate_out = []
+    sf_in_list = []
+    sf_out_list = []
+    sf95_out_list = []  
+
+    for eps in epsilons:
+        x = solve_also_x_gurobi(in_sample, epsilon=eps)
+
+        # Sizes
+        N_in, T_in = in_sample.shape
+        N_out, T_out = out_sample.shape
+
+        total_in = N_in * T_in
+        total_out = N_out * T_out
+
+        # Violations
+        violations_in = np.count_nonzero(in_sample < x)
+        violations_out = np.count_nonzero(out_sample < x)
+
+        rate_in = violations_in / total_in * 100
+        rate_out = violations_out / total_out * 100
+
+        # Shortfalls
+        sf_in = np.maximum(0, x - in_sample).mean()
+        sf_out = np.maximum(0, x - out_sample).mean()
+
+        sf95_out = np.percentile(
+            np.maximum(0, x - out_sample).flatten(), 95
+        )
+
+        # Store
+        bids_also.append(x)
+        violation_rate_in.append(rate_in)
+        violation_rate_out.append(rate_out)
+        sf_in_list.append(sf_in)
+        sf_out_list.append(sf_out)
+        sf95_out_list.append(sf95_out)
+
+# convert
+    bids_also = np.array(bids_also)
+    violation_rate_in = np.array(violation_rate_in)
+    violation_rate_out = np.array(violation_rate_out)
+    sf_in_list = np.array(sf_in_list)
+    sf_out_list = np.array(sf_out_list)
+    sf95_out_list = np.array(sf95_out_list)
+
+
+    results_table = pd.DataFrame({
+    "epsilon": epsilons,
+    "bid": bids_also,
+    "violation_rate_in (%)": violation_rate_in,
+    "violation_rate_out (%)": violation_rate_out,
+    "sf_in": sf_in_list,
+    "sf_out": sf_out_list,
+    "sf95_out": sf95_out_list
+        })
+
+    print(results_table)   
+   # 8. Save sensitivity results
+    results_table.to_csv(
+    os.path.join("Results", "Step 2", "p90_analysis_table.csv"),
+    index=False
+    )
+
+
+
 
 if __name__ == "__main__":
     main()

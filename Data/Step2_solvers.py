@@ -18,7 +18,7 @@ def _validate_inputs(profiles: np.ndarray, epsilon: float) -> tuple[np.ndarray, 
         raise ValueError("profiles must be a 2D array-like object")
     if arr.size == 0:
         raise ValueError("profiles must not be empty")
-    if not (0 < epsilon <= 1):
+    if not (0 <= epsilon <= 1):
         raise ValueError("epsilon must satisfy 0 < epsilon <= 1")
 
     m_count, omega = arr.shape
