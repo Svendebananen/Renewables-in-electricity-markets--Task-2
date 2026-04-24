@@ -25,7 +25,7 @@ MAX_DELTA = 35          # kW per minute
 START_TIME = datetime(2000, 1, 1, 12, 0)   # 12:00 (date is arbitrary)
 NUM_STEPS = 60          # minutes (produces 61 time points: 12:00 … 13:00)
 OUTPUT_FILE = "load_scenarios.csv"
-DEFAULT_SEED = 30
+DEFAULT_SEED = 60
 
 
 def generate_scenario(rng: random.Random) -> list[tuple[str, int]]:
@@ -41,7 +41,7 @@ def generate_scenario(rng: random.Random) -> list[tuple[str, int]]:
     load = rng.randint(LOAD_MIN, LOAD_MAX)
     scenario: list[tuple[str, int]] = []
 
-    for step in range(NUM_STEPS + 1):          # 0 … 60 inclusive
+    for step in range(NUM_STEPS):          # 0 … 59
         timestamp = START_TIME + timedelta(minutes=step)
         time_str = timestamp.strftime("%H:%M")
         scenario.append((time_str, load))
@@ -62,7 +62,7 @@ def generate_load_scenarios(
 ) -> np.ndarray:
     """Generate a scenario matrix with shape (num_scenarios, num_steps + 1)."""
     rng = random.Random(seed)
-    profiles = np.zeros((num_scenarios, num_steps + 1), dtype=float)
+    profiles = np.zeros((num_scenarios, num_steps ), dtype=float)
 
     for scenario_idx in range(num_scenarios):
         scenario = generate_scenario(rng)
