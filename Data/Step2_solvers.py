@@ -87,7 +87,7 @@ def solve_cvar_gurobi(
 
     model.addConstrs(
         (
-            zeta[m, w] >= c_up - float(arr[m, w]) - beta
+            zeta[m, w] >= c_up - float(arr[m, w])
             for m in range(m_count)
             for w in range(omega)
         ),
@@ -96,12 +96,20 @@ def solve_cvar_gurobi(
 
     
     model.addConstr(
-        beta + (1.0 / (epsilon * total_samples)) *
-        gp.quicksum(zeta[m, w] for m in range(m_count) for w in range(omega))
-        <= 0,
-        name="cvar_constraint",
+    (1.0 / (m_count * omega)) * 
+    gp.quicksum(zeta[m, w] for m in range(m_count) for w in range(omega)) 
+    <= (1 - epsilon) * beta,
+    name="Expectation Bound"
     )
 
+    model.addConstrs(
+        (
+            zeta[m, w] >= beta
+            for m in range(m_count)
+            for w in range(omega)
+        ),
+        name="VaR Bound",
+    )
     model.optimize()
 
     
