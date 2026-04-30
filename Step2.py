@@ -47,7 +47,7 @@ def main():
         runtime = elapsed_also if name == "ALSO-X" else elapsed_cvar
 
         print(f"  {name:6} → {violations} violations ,"
-            f"violation rate{rate:.2f}%," 
+            f"violation rate: {rate:.2f}%," 
             f"Runtime: {runtime:.2f} seconds")
     print()
 
