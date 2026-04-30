@@ -26,7 +26,7 @@ frontier_one = []
 baseline_one = None
 
 for beta in BETA_VALUES:
-    p_DA_values, scenario_profit, cvar_value = solve_one_price(
+    p_DA_values, scenario_profit, cvar_value, _, _ = solve_one_price(
         SCENARIOS, prob, wind_mw, lambda_DA, lambda_B, beta=beta, alpha=ALPHA
     )
     expected_profit = sum(prob[omega] * scenario_profit[omega] for omega in SCENARIOS)
@@ -100,7 +100,7 @@ frontier_two = []
 baseline_two = None
 
 for beta in BETA_VALUES:
-    p_DA_values, scenario_profit, cvar_value = solve_two_price(
+    p_DA_values, scenario_profit, cvar_value, _, _ = solve_two_price(
         SCENARIOS, prob, wind_mw, lambda_DA, lambda_B_up, lambda_B_down,
         beta=beta, alpha=ALPHA
     )
