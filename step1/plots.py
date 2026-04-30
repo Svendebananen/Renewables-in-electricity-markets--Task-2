@@ -149,12 +149,15 @@ def plot_cvar_frontier_With_Both_Models(frontier_single_price_df, frontier_two_p
             (row["cvar"], row["expected_profit"]),
             textcoords="offset points", xytext=(5, 5)
         )
+    offset = 25
+
     for _, row in frontier_two_price_df.iterrows():
         plt.annotate(
             f"beta={row['beta']:.2f}",
             (row["cvar"], row["expected_profit"]),
-            textcoords="offset points", xytext=(5, 5)
+            textcoords="offset points", xytext=(5, offset)
         )
+        offset -= 5  # adjust offset for the next annotation to avoid overlap
     plt.xlabel("CVaR (alpha = 0.90)")
     plt.ylabel("Expected Profit (€)")
     plt.title(title)

@@ -67,7 +67,7 @@ plot_profit_histogram(
     color="#fa9537"
 )
 
-# plot Expected day ahead value, expected balancing value and the difference for each hour to determine the decision of how much to offer in the day-ahead market
+# plot Expected day ahead value, expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
 plot_Expected_DA_And_Balancing_Values(
     expected_balancing_value, expected_DA_value, HOURS,
     save_path=PLOTS / "Task1.1_expected_da_and_balancing_values.png",

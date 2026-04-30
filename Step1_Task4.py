@@ -10,7 +10,7 @@ from step1.models import (
 from step1.plots import plot_cvar_frontier_With_Both_Models, plot_profit_histogram, plot_cvar_frontier
 
 ALPHA       = 0.9
-BETA_VALUES = [0.0, 0.25, 0.5, 0.75, 1.0]
+BETA_VALUES = [0.0, 0.02, 0.25, 0.5, 0.75, 1.0]
 
 # ---------------------------------------------------------------------------
 # Balancing prices
