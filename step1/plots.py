@@ -38,6 +38,24 @@ def plot_profit_histogram(scenario_profit, prob, title, save_path, color="#fa953
     plt.savefig(save_path, dpi=150)
     plt.show()
 
+
+def plot_Expected_DA_And_Balancing_Values(lambda_Balancing, lambda_One_Price_DA, hours, save_path, color = "#fa9537"):
+    """
+    Plot of expected day-ahead value, expected balancing value and the difference for each hour to determine the decision of how much to offer in the day-ahead market.
+    """
+    hours = list(hours)
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(hours, [lambda_One_Price_DA[h] for h in hours], marker='o', color='steelblue', label='Expected One-Price DA Value')
+    plt.plot(hours, [lambda_Balancing[h] for h in hours], marker='s', color='darkgreen', label='Expected One-Price Balancing Value')
+    plt.xlabel('Hour of Day')
+    plt.ylabel('Value (€/MWh)')
+    plt.title('Expected Day-Ahead price vs expected balancing price')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=150)
+    plt.show()
+
 def plot_Mean_Wind_Generation_And_DA_Price(wind_mw, lambda_One_Price_DA, lambda_Two_Price_DA, hours, save_path, color = "#fa9537"):
     """
     Plot of mean wind generation and day-ahead price across hours.

@@ -4,7 +4,7 @@ from step1.data import (
 )
 
 from step1.models import compute_balancing_prices_one, solve_one_price, compute_balancing_prices_two, solve_two_price
-from step1.plots import plot_Mean_Wind_Generation_And_DA_Price, plot_profit_histogram
+from step1.plots import plot_Expected_DA_And_Balancing_Values, plot_Mean_Wind_Generation_And_DA_Price, plot_profit_histogram
 # -------- Task 1 --------
 print("------ Task 1: One-price scheme ------")
 # compute balancing prices
@@ -34,6 +34,16 @@ print("Hourly offers and profits:")
 for h in HOURS:
     print(f"  Hour {h:2d}: p_DA = {p_DA_One_Price_values[h]:.2f} MW, profit = {hourly_profit[h]:.2f}")
 
+
+# Expected day ahead value and expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
+expected_DA_value = {}
+expected_balancing_value = {}
+print("\nExpected day-ahead value and expected balancing value for each hour:")
+for h in HOURS:
+    expected_DA_value[h] = sum(prob[omega] * lambda_DA.loc[omega, h] for omega in SCENARIOS)
+    expected_balancing_value[h] = sum(prob[omega] * lambda_B.loc[omega, h] for omega in SCENARIOS)
+    print(f"  Hour {h:2d}: Expected DA value = {expected_DA_value[h]:.2f} €/MWh, Expected balancing value = {expected_balancing_value[h]:.2f} €/MWh, difference = {expected_DA_value[h] - expected_balancing_value[h]:.2f} €/MWh")
+
 # statistical analysis of scenarios
 profits_array = np.array(list(scenario_profit.values()))
 min_val   = profits_array.min()
@@ -57,6 +67,12 @@ plot_profit_histogram(
     color="#fa9537"
 )
 
+# plot Expected day ahead value, expected balancing value and the difference for each hour to determine the decision of how much to offer in the day-ahead market
+plot_Expected_DA_And_Balancing_Values(
+    expected_balancing_value, expected_DA_value, HOURS,
+    save_path=PLOTS / "Task1.1_expected_da_and_balancing_values.png",
+    color="#fa9537"
+)
 
 
 # -------- Task 2 --------
@@ -90,6 +106,17 @@ print(f"Total expected profit: {total_profit:.2f} €")
 print("Hourly offers and profits:")
 for h in HOURS:
     print(f"  Hour {h:2d}: p_DA = {p_DA_Two_Price_values[h]:.2f} MW, profit = {hourly_profit[h]:.2f}")
+
+
+# Expected day ahead value and expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
+
+print("\nExpected day-ahead value and expected balancing value for each hour:")
+for h in HOURS:
+    expected_Two_price_DA_value = sum(prob[omega] * lambda_DA.loc[omega, h] for omega in SCENARIOS)
+    expected_Two_Price_balancing_up_value = sum(prob[omega] * lambda_B_up.loc[omega, h] for omega in SCENARIOS)
+    expected_Two_Price_balancing_down_value = sum(prob[omega] * lambda_B_down.loc[omega, h] for omega in SCENARIOS)
+    print(f"  Hour {h:2d}: Expected DA value = {expected_Two_price_DA_value:.2f} €/MWh, Expected balancing up value = {expected_Two_Price_balancing_up_value:.2f} €/MWh, Expected balancing down value = {expected_Two_Price_balancing_down_value:.2f} €/MWh") # difference = {expected_Two_price_DA_value - expected_Two_Price_balancing_up_value:.2f} €/MWh")
+
 
 # statistical analysis of scenarios
 profits_array = np.array(list(scenario_profit.values()))
