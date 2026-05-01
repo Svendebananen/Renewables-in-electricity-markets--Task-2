@@ -1,3 +1,9 @@
+"""
+Tasks 1.1 and 1.2:
+Task 1.1: Offering Strategy Under a One-Price Balancing Scheme
+Task 1.2: Offering Strategy Under a Two-Price Balancing Scheme
+"""
+
 import numpy as np
 from step1.data import (
     wind_mw, lambda_DA, si, prob, SCENARIOS, HOURS, PLOTS
@@ -5,6 +11,7 @@ from step1.data import (
 
 from step1.models import compute_balancing_prices_one, solve_one_price, compute_balancing_prices_two, solve_two_price
 from step1.plots import plot_Expected_DA_And_Balancing_Values, plot_Mean_Wind_Generation_And_DA_Price, plot_profit_histogram
+
 # -------- Task 1 --------
 print("------ Task 1: One-price scheme ------")
 # compute balancing prices
@@ -35,7 +42,7 @@ for h in HOURS:
     print(f"  Hour {h:2d}: p_DA = {p_DA_One_Price_values[h]:.2f} MW, profit = {hourly_profit[h]:.2f}")
 
 
-# Expected day ahead value and expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
+# expected day ahead value and expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
 expected_DA_value = {}
 expected_balancing_value = {}
 print("\nExpected day-ahead value and expected balancing value for each hour:")
@@ -69,7 +76,7 @@ plot_profit_histogram(
     color="#fa9537"
 )
 
-# plot Expected day ahead value, expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
+# plot expected day ahead value, expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
 plot_Expected_DA_And_Balancing_Values(
     expected_balancing_value, expected_DA_value, HOURS,
     save_path=PLOTS / "Task1.1_expected_da_and_balancing_values.png",
@@ -110,7 +117,7 @@ for h in HOURS:
     print(f"  Hour {h:2d}: p_DA = {p_DA_Two_Price_values[h]:.2f} MW, profit = {hourly_profit[h]:.2f}")
 
 
-# Expected day ahead value and expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
+# expected day ahead value and expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
 
 print("\nExpected day-ahead value and expected balancing value for each hour:")
 for h in HOURS:
