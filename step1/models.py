@@ -13,6 +13,7 @@ Return value for both solvers:
 """
 import gurobipy as gp
 from gurobipy import GRB
+from step1.data import P_NOM
 
 DEFICIT_MULTIPLIER = 1.25
 SURPLUS_MULTIPLIER = 0.85
@@ -86,7 +87,7 @@ def solve_one_price(
     Balancing_Revenue : float
     """
     hours   = list(lambda_DA.columns)
-    p_nom   = wind_mw.max().max()   # upper bound – use actual P_NOM if preferred
+    p_nom   = P_NOM   # upper bound – use actual P_NOM if preferred
 
     model = gp.Model("one_price")
     if not verbose:
@@ -189,7 +190,7 @@ def solve_two_price(
     Balancing_Revenue : float
     """
     hours = list(lambda_DA.columns)
-    p_nom = wind_mw.max().max()
+    p_nom = P_NOM
 
     model = gp.Model("two_price")
     if not verbose:

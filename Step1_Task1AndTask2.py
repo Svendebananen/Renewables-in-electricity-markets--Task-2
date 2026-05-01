@@ -13,13 +13,13 @@ from step1.models import compute_balancing_prices_one, solve_one_price, compute_
 from step1.plots import plot_Expected_DA_And_Balancing_Values, plot_Mean_Wind_Generation_And_DA_Price, plot_profit_histogram
 
 # -------- Task 1 --------
-print("------ Task 1: One-price scheme ------")
+print("\n------ Task 1: One-price scheme ------")
 # compute balancing prices
 lambda_B = compute_balancing_prices_one(lambda_DA, si)
 
 # solve one-price model (beta=0: pure expected-profit maximisation)
 p_DA_One_Price_values, scenario_profit, _, Day_Ahead_Revenue_One_Price, Balancing_Revenue_One_Price = solve_one_price(
-    SCENARIOS, prob, wind_mw, lambda_DA, lambda_B, verbose=True
+    SCENARIOS, prob, wind_mw, lambda_DA, lambda_B, verbose=False
 )
 
 # hourly expected profit
@@ -93,7 +93,7 @@ lambda_B_up, lambda_B_down = compute_balancing_prices_two(lambda_DA, si)
 
 # solve two-price model (beta=0: pure expected-profit maximisation)
 p_DA_Two_Price_values, scenario_profit, _, Day_Ahead_Revenue_Two_Price, Balancing_Revenue_Two_Price = solve_two_price(
-    SCENARIOS, prob, wind_mw, lambda_DA, lambda_B_up, lambda_B_down, verbose=True
+    SCENARIOS, prob, wind_mw, lambda_DA, lambda_B_up, lambda_B_down, verbose=False
 )
 
 # hourly expected profit
