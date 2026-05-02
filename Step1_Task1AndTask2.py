@@ -10,7 +10,7 @@ from step1.data import (
 )
 
 from step1.models import compute_balancing_prices_one, solve_one_price, compute_balancing_prices_two, solve_two_price
-from step1.plots import plot_Expected_DA_And_Balancing_Values, plot_Mean_Wind_Generation_And_DA_Price, plot_profit_histogram, plot_hourly_offers, plot_hourly_offers_and_prices, plot_profit_histogram_stacked
+from step1.plots import plot_Expected_DA_And_Balancing_Values, plot_Mean_Wind_And_DA_Offers, plot_profit_histogram, plot_hourly_offers, plot_hourly_offers_and_prices, plot_profit_histogram_comparison, plot_offers_and_prices_two
 
 # -------- Task 1 --------
 print("\n------ Task 1: One-price scheme ------")
@@ -18,8 +18,8 @@ print("\n------ Task 1: One-price scheme ------")
 lambda_B = compute_balancing_prices_one(lambda_DA, si)
 
 # solve one-price model (beta=0: pure expected-profit maximisation)
-p_DA_One_Price_values, scenario_profit, _, Day_Ahead_Revenue_One_Price, Balancing_Revenue_One_Price = solve_one_price(
-    SCENARIOS, prob, wind_mw, lambda_DA, lambda_B, verbose=True
+p_DA_One_Price_values, scenario_profit_one, _, Day_Ahead_Revenue_One_Price, Balancing_Revenue_One_Price = solve_one_price(
+    SCENARIOS, prob, wind_mw, lambda_DA, lambda_B, verbose=False
 )
 
 # hourly expected profit
@@ -52,7 +52,7 @@ for h in HOURS:
     print(f"  Hour {h:2d}: Expected DA value = {expected_DA_value[h]:.2f} €/MWh, Expected balancing value = {expected_balancing_value[h]:.2f} €/MWh, difference = {expected_DA_value[h] - expected_balancing_value[h]:.2f} €/MWh")
 
 # statistical analysis of scenarios
-profits_array = np.array(list(scenario_profit.values()))
+profits_array = np.array(list(scenario_profit_one.values()))
 min_val   = profits_array.min()
 max_val   = profits_array.max()
 range_val = max_val - min_val
@@ -83,7 +83,7 @@ plot_hourly_offers_and_prices(
 
 # plot profit distribution
 plot_profit_histogram(
-    scenario_profit, prob,
+    scenario_profit_one, prob,
     #title="Profit distribution across scenarios - One-price scheme",
     save_path=PLOTS / "Task1.1_profit_distribution.png",
     color="#fa9537"
@@ -105,7 +105,7 @@ print("------ Task 2: Two-price scheme ------")
 lambda_B_up, lambda_B_down = compute_balancing_prices_two(lambda_DA, si)
 
 # solve two-price model (beta=0: pure expected-profit maximisation)
-p_DA_Two_Price_values, scenario_profit, _, Day_Ahead_Revenue_Two_Price, Balancing_Revenue_Two_Price = solve_two_price(
+p_DA_Two_Price_values, scenario_profit_two, _, Day_Ahead_Revenue_Two_Price, Balancing_Revenue_Two_Price = solve_two_price(
     SCENARIOS, prob, wind_mw, lambda_DA, lambda_B_up, lambda_B_down, verbose=False
 )
 
@@ -133,15 +133,21 @@ for h in HOURS:
 # expected day ahead value and expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
 
 print("\nExpected day-ahead value and expected balancing value for each hour:")
+expected_Two_price_DA_value             = {}
+expected_Two_Price_balancing_up_value   = {}
+expected_Two_Price_balancing_down_value = {}
+
 for h in HOURS:
-    expected_Two_price_DA_value = sum(prob[omega] * lambda_DA.loc[omega, h] for omega in SCENARIOS)
-    expected_Two_Price_balancing_up_value = sum(prob[omega] * lambda_B_up.loc[omega, h] for omega in SCENARIOS)
-    expected_Two_Price_balancing_down_value = sum(prob[omega] * lambda_B_down.loc[omega, h] for omega in SCENARIOS)
-    print(f"  Hour {h:2d}: Expected DA value = {expected_Two_price_DA_value:.2f} €/MWh, Expected balancing up value = {expected_Two_Price_balancing_up_value:.2f} €/MWh, Expected balancing down value = {expected_Two_Price_balancing_down_value:.2f} €/MWh") # difference = {expected_Two_price_DA_value - expected_Two_Price_balancing_up_value:.2f} €/MWh")
+    expected_Two_price_DA_value[h]             = sum(prob[omega] * lambda_DA.loc[omega, h] for omega in SCENARIOS)
+    expected_Two_Price_balancing_up_value[h]   = sum(prob[omega] * lambda_B_up.loc[omega, h] for omega in SCENARIOS)
+    expected_Two_Price_balancing_down_value[h] = sum(prob[omega] * lambda_B_down.loc[omega, h] for omega in SCENARIOS)
+    print(f"  Hour {h:2d}: Expected DA value = {expected_Two_price_DA_value[h]:.2f} €/MWh, "
+          f"Expected balancing up value = {expected_Two_Price_balancing_up_value[h]:.2f} €/MWh, "
+          f"Expected balancing down value = {expected_Two_Price_balancing_down_value[h]:.2f} €/MWh")
 
 
 # statistical analysis of scenarios
-profits_array = np.array(list(scenario_profit.values()))
+profits_array = np.array(list(scenario_profit_two.values()))
 min_val   = profits_array.min()
 max_val   = profits_array.max()
 range_val = max_val - min_val
@@ -159,15 +165,30 @@ print(f"Median profit:      €{np.median(profits_array):.2f}")
 
 # plot profit distribution
 plot_profit_histogram(
-    scenario_profit, prob,
-    title="Profit distribution across scenarios - Two-price scheme",
+    scenario_profit_two, prob,
+    #title="Profit distribution across scenarios - Two-price scheme",
     save_path=PLOTS / "Task1.2_profit_distribution.png",
-    color="#3fe60c"
+    color="#3A7D8C"
 )
 
 # plot mean wind generation and day-ahead price across hours
-plot_Mean_Wind_Generation_And_DA_Price(
+plot_Mean_Wind_And_DA_Offers(
     wind_mw, p_DA_One_Price_values, p_DA_Two_Price_values, HOURS,
-    save_path=PLOTS / "Task1.2_mean_wind_and_da_price.png",
+    save_path=PLOTS / "Task1.2_mean_wind_and_da_offers.png",
     color="#fa9537"
+)
+
+# plot profit distribution comparison
+plot_profit_histogram_comparison(
+    scenario_profit_one, scenario_profit_two, prob,
+    save_path=PLOTS / "Task1.2_profit_distribution_comparison.png"
+) 
+
+
+plot_offers_and_prices_two(
+    wind_mw, p_DA_One_Price_values, p_DA_Two_Price_values,
+    expected_Two_price_DA_value, 
+    expected_Two_Price_balancing_up_value, 
+    expected_Two_Price_balancing_down_value,
+    HOURS, save_path=PLOTS / "Task1.2_offers_and_prices.png"
 )

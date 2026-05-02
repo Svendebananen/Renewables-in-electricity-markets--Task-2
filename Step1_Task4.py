@@ -174,5 +174,5 @@ plot_cvar_frontier(
 
 
 plot_cvar_frontier_With_Both_Models(
-    frontier_one_df, frontier_two_df, "Expected Profit vs CVaR Trade-off - Both Models", PLOTS / "Task1.4_both_models_profit_cvar_tradeoff.png"
+    frontier_one_df, frontier_two_df, None, PLOTS / "Task1.4_both_models_profit_cvar_tradeoff.png"
 )
