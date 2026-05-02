@@ -31,7 +31,7 @@ def compute_balancing_prices_one(lambda_DA, si):
     lambda_B = lambda_DA.copy()
     for omega in lambda_DA.index:
         for h in lambda_DA.columns:
-            if si.loc[omega, h] == 1:                                    # deficit
+            if si.loc[omega, h] == 1:                                     # deficit
                 lambda_B.loc[omega, h] = DEFICIT_MULTIPLIER * lambda_DA.loc[omega, h]
             else:                                                         # surplus
                 lambda_B.loc[omega, h] = SURPLUS_MULTIPLIER * lambda_DA.loc[omega, h]

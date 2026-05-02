@@ -99,6 +99,24 @@ def plot_Mean_Wind_Generation_And_DA_Price(wind_mw, lambda_One_Price_DA, lambda_
     plt.savefig(save_path, dpi=150)
     plt.show()
 
+def plot_hourly_offers(p_DA_values, hours, save_path, title, color="#2196F3"):
+    """
+    Bar plot of optimal day-ahead offers for each hour.
+    """
+    hours = list(hours)
+    offers = [p_DA_values[h] for h in hours]
+
+    plt.figure(figsize=(10, 5))
+    plt.bar(hours, offers, color=color, edgecolor='black', linewidth=0.5)
+    plt.xlabel('Hour of Day')
+    plt.ylabel('Offer (MW)')
+    plt.title('Optimal day-ahead offers')
+    plt.title(title)
+    plt.xticks(hours, [h + 1 for h in hours])
+    plt.ylim(0, 600)
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=150)
+    plt.show()
 
 def plot_cvar_frontier(frontier_df, title, save_path):
     """

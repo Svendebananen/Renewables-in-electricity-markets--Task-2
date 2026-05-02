@@ -10,7 +10,7 @@ from step1.data import (
 )
 
 from step1.models import compute_balancing_prices_one, solve_one_price, compute_balancing_prices_two, solve_two_price
-from step1.plots import plot_Expected_DA_And_Balancing_Values, plot_Mean_Wind_Generation_And_DA_Price, plot_profit_histogram
+from step1.plots import plot_Expected_DA_And_Balancing_Values, plot_Mean_Wind_Generation_And_DA_Price, plot_profit_histogram, plot_hourly_offers
 
 # -------- Task 1 --------
 print("\n------ Task 1: One-price scheme ------")
@@ -19,7 +19,7 @@ lambda_B = compute_balancing_prices_one(lambda_DA, si)
 
 # solve one-price model (beta=0: pure expected-profit maximisation)
 p_DA_One_Price_values, scenario_profit, _, Day_Ahead_Revenue_One_Price, Balancing_Revenue_One_Price = solve_one_price(
-    SCENARIOS, prob, wind_mw, lambda_DA, lambda_B, verbose=False
+    SCENARIOS, prob, wind_mw, lambda_DA, lambda_B, verbose=True
 )
 
 # hourly expected profit
@@ -67,6 +67,13 @@ print(f"Std Dev / Range: {np.std(profits_array) / range_val:.1%}")
 print(f"Minimum profit:     €{min_val:,.2f}")
 print(f"Maximum profit:     €{max_val:,.2f}")
 print(f"Median profit:      €{np.median(profits_array):.2f}")
+
+plot_hourly_offers(
+    p_DA_One_Price_values, HOURS,
+    title="Optimal day-ahead offers - One-price scheme",
+    save_path=PLOTS / "Task1.1_hourly_offers.png",
+    color="#fa9537"
+)
 
 # plot profit distribution
 plot_profit_histogram(
