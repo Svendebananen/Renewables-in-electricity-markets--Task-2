@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from adjustText import adjust_text
 
 
-def plot_profit_histogram(scenario_profit, prob, title, save_path, color="#fa9537"):
+def plot_profit_histogram(scenario_profit, prob, title=None, save_path=None, color="#FF6B35"):
     """
     Histogram of per-scenario profits with a vertical line at the expected profit.
 
@@ -39,7 +39,7 @@ def plot_profit_histogram(scenario_profit, prob, title, save_path, color="#fa953
     plt.show()
 
 
-def plot_Expected_DA_And_Balancing_Values(lambda_Balancing, lambda_One_Price_DA, hours, save_path, color = "#fa9537"):
+def plot_Expected_DA_And_Balancing_Values(lambda_Balancing, lambda_One_Price_DA, hours, save_path, color="#fa9537"):
     """
     Plot of expected day-ahead value, expected balancing value and the difference for each hour to determine the decision of how much to offer in the day-ahead market.
     """
@@ -51,6 +51,7 @@ def plot_Expected_DA_And_Balancing_Values(lambda_Balancing, lambda_One_Price_DA,
     plt.xlabel('Hour of Day')
     plt.ylabel('Value (€/MWh)')
     plt.title('Expected Day-Ahead price vs expected balancing price')
+    plt.xticks(hours, [h + 1 for h in hours])
     plt.legend()
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
@@ -248,3 +249,45 @@ def plot_crossvalidation(results_df, save_path_scatter, save_path_bar):
     plt.tight_layout()
     plt.savefig(save_path_bar, dpi=150)
     plt.show()
+
+def plot_hourly_offers_and_prices(p_DA_values, lambda_Balancing, lambda_DA, hours, save_path, title=None, 
+                                   color_offer="#FF6B35", color_DA="steelblue", color_balancing="#4CAF50"):
+    """
+    Combined plot: bar chart of optimal day-ahead offers (left axis) and
+    expected DA vs balancing prices (right axis) for each hour.
+    """
+    hours = list(hours)
+    offers = [p_DA_values[h] for h in hours]
+    da_prices = [lambda_DA[h] for h in hours]
+    bal_prices = [lambda_Balancing[h] for h in hours]
+
+    fig, ax1 = plt.subplots(figsize=(12, 5))
+
+    # left axis: hourly offers
+    ax1.bar(hours, offers, color=color_offer, edgecolor='black', linewidth=0.5, alpha=0.7, label='Day-Ahead Offer (MW)')
+    ax1.set_xlabel('Hour of Day')
+    ax1.set_ylabel('Offer (MW)', color=color_offer)
+    ax1.tick_params(axis='y', labelcolor=color_offer)
+    ax1.set_ylim(0, 600)
+    ax1.set_xticks(hours)
+    ax1.set_xticklabels([h + 1 for h in hours])
+
+    # right axis: expected prices
+    ax2 = ax1.twinx()
+    ax2.plot(hours, da_prices, marker='o', color=color_DA, label='Expected DA Price (€/MWh)')
+    ax2.plot(hours, bal_prices, marker='s', color=color_balancing, label='Expected Balancing Price (€/MWh)')
+    ax2.set_ylabel('Price (€/MWh)')
+
+    # combined legend
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    #ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper left')
+    ax1.legend(lines1 + lines2, labels1 + labels2,
+           bbox_to_anchor=(0.5, 1.02), loc='lower center',
+           ncol=3, borderaxespad=0, fontsize=9)
+    plt.title(title)
+    fig.tight_layout()
+    plt.savefig(save_path, dpi=150)
+    plt.show()
+
+

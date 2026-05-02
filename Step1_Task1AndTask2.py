@@ -10,7 +10,7 @@ from step1.data import (
 )
 
 from step1.models import compute_balancing_prices_one, solve_one_price, compute_balancing_prices_two, solve_two_price
-from step1.plots import plot_Expected_DA_And_Balancing_Values, plot_Mean_Wind_Generation_And_DA_Price, plot_profit_histogram, plot_hourly_offers
+from step1.plots import plot_Expected_DA_And_Balancing_Values, plot_Mean_Wind_Generation_And_DA_Price, plot_profit_histogram, plot_hourly_offers, plot_hourly_offers_and_prices, plot_profit_histogram_stacked
 
 # -------- Task 1 --------
 print("\n------ Task 1: One-price scheme ------")
@@ -74,11 +74,17 @@ plot_hourly_offers(
     save_path=PLOTS / "Task1.1_hourly_offers.png",
     color="#fa9537"
 )
+# single plot with offers and prices
+plot_hourly_offers_and_prices(
+    p_DA_One_Price_values, expected_balancing_value, expected_DA_value, HOURS,
+    #title="Optimal day-ahead offers and expected prices - One-price scheme",
+    save_path=PLOTS / "Task1.1_hourly_offers_and_prices.png"
+)
 
 # plot profit distribution
 plot_profit_histogram(
     scenario_profit, prob,
-    title="Profit distribution across scenarios - One-price scheme",
+    #title="Profit distribution across scenarios - One-price scheme",
     save_path=PLOTS / "Task1.1_profit_distribution.png",
     color="#fa9537"
 )
