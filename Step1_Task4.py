@@ -175,4 +175,12 @@ plot_cvar_frontier(
 
 plot_cvar_frontier_With_Both_Models(
     frontier_one_df, frontier_two_df, None, PLOTS / "Task1.4_both_models_profit_cvar_tradeoff.png"
+) 
+
+# profit distribution at beta=1
+scenario_profit_beta1 = frontier_two[-1]["scenario_profit"]
+plot_profit_histogram(
+    scenario_profit_beta1, prob,
+    save_path=PLOTS / "Task1.4_two_price_profit_distribution_beta1.png",
+    color="#4CAF50"
 )
