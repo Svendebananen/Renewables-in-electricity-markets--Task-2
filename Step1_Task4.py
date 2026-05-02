@@ -1,3 +1,7 @@
+"""
+Task 1.4) Risk-Averse Offering Strategy
+"""
+
 import pandas as pd
 import numpy as np
 from step1.data import (

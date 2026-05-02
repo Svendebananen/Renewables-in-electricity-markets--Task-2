@@ -1,3 +1,8 @@
+"""
+Task 1.3) Ex-post Analysis
+8-fold cross validation using 200 in-sample and 1400 out-of-sample scenarios.
+"""
+
 import numpy as np
 import pandas as pd
 from step1.data import (
@@ -25,7 +30,7 @@ for fold_idx in range(N_FOLDS):
     prob_insample  = prob[insample]  / prob[insample].sum()
     prob_outsample = prob[outsample] / prob[outsample].sum()
 
-    p_DA_values, _, _ = solve_two_price(
+    p_DA_values, _, _, _, _ = solve_two_price(
         insample, prob_insample, wind_mw, lambda_DA, lambda_B_up, lambda_B_down
     )
 
