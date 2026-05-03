@@ -1,3 +1,9 @@
+"""
+Tasks 1.1 and 1.2:
+Task 1.1: Offering Strategy Under a One-Price Balancing Scheme
+Task 1.2: Offering Strategy Under a Two-Price Balancing Scheme
+"""
+
 import numpy as np
 from step1.data import (
     wind_mw, lambda_DA, si, prob, SCENARIOS, HOURS, PLOTS
@@ -5,14 +11,15 @@ from step1.data import (
 
 from step1.models import compute_balancing_prices_one, solve_one_price, compute_balancing_prices_two, solve_two_price
 from step1.plots import plot_Expected_DA_And_Balancing_Values, plot_Mean_Wind_Generation_And_DA_Price, plot_profit_histogram
+
 # -------- Task 1 --------
-print("------ Task 1: One-price scheme ------")
+print("\n------ Task 1: One-price scheme ------")
 # compute balancing prices
 lambda_B = compute_balancing_prices_one(lambda_DA, si)
 
 # solve one-price model (beta=0: pure expected-profit maximisation)
-p_DA_One_Price_values, scenario_profit, _ = solve_one_price(
-    SCENARIOS, prob, wind_mw, lambda_DA, lambda_B, verbose=True
+p_DA_One_Price_values, scenario_profit, _, Day_Ahead_Revenue_One_Price, Balancing_Revenue_One_Price = solve_one_price(
+    SCENARIOS, prob, wind_mw, lambda_DA, lambda_B, verbose=False
 )
 
 # hourly expected profit
@@ -35,7 +42,7 @@ for h in HOURS:
     print(f"  Hour {h:2d}: p_DA = {p_DA_One_Price_values[h]:.2f} MW, profit = {hourly_profit[h]:.2f}")
 
 
-# Expected day ahead value and expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
+# expected day ahead value and expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
 expected_DA_value = {}
 expected_balancing_value = {}
 print("\nExpected day-ahead value and expected balancing value for each hour:")
@@ -53,6 +60,8 @@ range_val = max_val - min_val
 print()
 print(f"Range: €{range_val:,.2f}")
 print(f"Expected profit:    €{np.average(profits_array, weights=list(prob.loc[SCENARIOS])):.2f}")
+print(f"Day-Ahead Revenue:  €{Day_Ahead_Revenue_One_Price:.2f}")
+print(f"Balancing Revenue:  €{Balancing_Revenue_One_Price:.2f}")
 print(f"Standard deviation: €{np.std(profits_array):.2f}")
 print(f"Std Dev / Range: {np.std(profits_array) / range_val:.1%}")
 print(f"Minimum profit:     €{min_val:,.2f}")
@@ -67,7 +76,7 @@ plot_profit_histogram(
     color="#fa9537"
 )
 
-# plot Expected day ahead value, expected balancing value and the difference for each hour to determine the decision of how much to offer in the day-ahead market
+# plot expected day ahead value, expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
 plot_Expected_DA_And_Balancing_Values(
     expected_balancing_value, expected_DA_value, HOURS,
     save_path=PLOTS / "Task1.1_expected_da_and_balancing_values.png",
@@ -83,8 +92,8 @@ print("------ Task 2: Two-price scheme ------")
 lambda_B_up, lambda_B_down = compute_balancing_prices_two(lambda_DA, si)
 
 # solve two-price model (beta=0: pure expected-profit maximisation)
-p_DA_Two_Price_values, scenario_profit, _ = solve_two_price(
-    SCENARIOS, prob, wind_mw, lambda_DA, lambda_B_up, lambda_B_down, verbose=True
+p_DA_Two_Price_values, scenario_profit, _, Day_Ahead_Revenue_Two_Price, Balancing_Revenue_Two_Price = solve_two_price(
+    SCENARIOS, prob, wind_mw, lambda_DA, lambda_B_up, lambda_B_down, verbose=False
 )
 
 # hourly expected profit
@@ -108,7 +117,7 @@ for h in HOURS:
     print(f"  Hour {h:2d}: p_DA = {p_DA_Two_Price_values[h]:.2f} MW, profit = {hourly_profit[h]:.2f}")
 
 
-# Expected day ahead value and expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
+# expected day ahead value and expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
 
 print("\nExpected day-ahead value and expected balancing value for each hour:")
 for h in HOURS:
@@ -127,6 +136,8 @@ range_val = max_val - min_val
 print()
 print(f"Range: €{range_val:,.2f}")
 print(f"Expected profit:    €{np.average(profits_array, weights=list(prob.loc[SCENARIOS])):.2f}")
+print(f"Day-Ahead Revenue:  €{Day_Ahead_Revenue_Two_Price:.2f}")
+print(f"Balancing Revenue:  €{Balancing_Revenue_Two_Price:.2f}")
 print(f"Standard deviation: €{np.std(profits_array):.2f}")
 print(f"Std Dev / Range: {np.std(profits_array) / range_val:.1%}")
 print(f"Minimum profit:     €{min_val:,.2f}")

@@ -13,6 +13,7 @@ Return value for both solvers:
 """
 import gurobipy as gp
 from gurobipy import GRB
+from step1.data import P_NOM
 
 DEFICIT_MULTIPLIER = 1.25
 SURPLUS_MULTIPLIER = 0.85
@@ -82,9 +83,11 @@ def solve_one_price(
     p_DA_values     : dict {h: float}
     scenario_profit : dict {omega: float}
     cvar_value      : float
+    Day_Ahead_Revenue : float
+    Balancing_Revenue : float
     """
     hours   = list(lambda_DA.columns)
-    p_nom   = wind_mw.max().max()   # upper bound – use actual P_NOM if preferred
+    p_nom   = P_NOM   # upper bound – use actual P_NOM if preferred
 
     model = gp.Model("one_price")
     if not verbose:
@@ -139,11 +142,24 @@ def solve_one_price(
         )
         for omega in scenarios
     }
+    
     cvar_value = Etha.X - (1 / (1 - alpha)) * sum(
         prob[omega] * Aux[omega].X for omega in scenarios
     )
 
-    return p_DA_values, scenario_profit, cvar_value
+    Day_Ahead_Revenue = sum(
+        prob[omega] * lambda_DA.loc[omega, h] * p_DA_values[h]
+        for omega in scenarios
+        for h in hours
+    )
+
+    Balancing_Revenue = sum(
+        prob[omega] * lambda_B.loc[omega, h] * (wind_mw.loc[omega, h] - p_DA_values[h])
+        for omega in scenarios
+        for h in hours
+    )
+
+    return p_DA_values, scenario_profit, cvar_value, Day_Ahead_Revenue, Balancing_Revenue
 
 
 def solve_two_price(
@@ -170,9 +186,11 @@ def solve_two_price(
     p_DA_values     : dict {h: float}
     scenario_profit : dict {omega: float}
     cvar_value      : float
+    Day_Ahead_Revenue : float
+    Balancing_Revenue : float
     """
     hours = list(lambda_DA.columns)
-    p_nom = wind_mw.max().max()
+    p_nom = P_NOM
 
     model = gp.Model("two_price")
     if not verbose:
@@ -242,8 +260,22 @@ def solve_two_price(
         )
         for omega in scenarios
     }
+
     cvar_value = Etha.X - (1 / (1 - alpha)) * sum(
         prob[omega] * Aux[omega].X for omega in scenarios
     )
 
-    return p_DA_values, scenario_profit, cvar_value
+    Day_Ahead_Revenue = sum(
+        prob[omega] * lambda_DA.loc[omega, h] * p_DA_values[h]
+        for omega in scenarios
+        for h in hours
+    )
+
+    Balancing_Revenue = sum(
+        prob[omega] * (lambda_B_up.loc[omega, h]   * delta_up_vals[omega, h] -
+                       lambda_B_down.loc[omega, h] * delta_down_vals[omega, h])
+        for omega in scenarios
+        for h in hours
+    )
+
+    return p_DA_values, scenario_profit, cvar_value, Day_Ahead_Revenue, Balancing_Revenue

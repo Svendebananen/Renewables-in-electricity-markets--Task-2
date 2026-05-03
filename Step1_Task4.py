@@ -10,7 +10,7 @@ from step1.models import (
 from step1.plots import plot_cvar_frontier_With_Both_Models, plot_profit_histogram, plot_cvar_frontier
 
 ALPHA       = 0.9
-BETA_VALUES = [0.0, 0.25, 0.5, 0.75, 1.0]
+BETA_VALUES = [0.0, 0.02, 0.25, 0.5, 0.75, 1.0]
 
 # ---------------------------------------------------------------------------
 # Balancing prices
@@ -26,7 +26,7 @@ frontier_one = []
 baseline_one = None
 
 for beta in BETA_VALUES:
-    p_DA_values, scenario_profit, cvar_value = solve_one_price(
+    p_DA_values, scenario_profit, cvar_value, _, _ = solve_one_price(
         SCENARIOS, prob, wind_mw, lambda_DA, lambda_B, beta=beta, alpha=ALPHA
     )
     expected_profit = sum(prob[omega] * scenario_profit[omega] for omega in SCENARIOS)
@@ -100,7 +100,7 @@ frontier_two = []
 baseline_two = None
 
 for beta in BETA_VALUES:
-    p_DA_values, scenario_profit, cvar_value = solve_two_price(
+    p_DA_values, scenario_profit, cvar_value, _, _ = solve_two_price(
         SCENARIOS, prob, wind_mw, lambda_DA, lambda_B_up, lambda_B_down,
         beta=beta, alpha=ALPHA
     )
