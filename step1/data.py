@@ -30,3 +30,4 @@ P_NOM     = 500          # nominal power of the wind turbine (MW)
 N_HOURS   = 24
 HOURS     = range(N_HOURS)
 SCENARIOS = list(wind_mw.index)
+

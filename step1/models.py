@@ -279,3 +279,4 @@ def solve_two_price(
     )
 
     return p_DA_values, scenario_profit, cvar_value, Day_Ahead_Revenue, Balancing_Revenue
+

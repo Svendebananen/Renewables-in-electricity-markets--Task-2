@@ -393,4 +393,136 @@ def plot_offers_and_prices_two(wind_mw, p_DA_one, p_DA_two,
     fig.tight_layout()
     if save_path is not None:
         plt.savefig(save_path, dpi=150)
-    plt.show()
+    plt.show() 
+
+def plot_profit_boxplot(frontier, color, title, save_path, alpha=0.9):
+    betas = [row["beta"] for row in frontier]
+    data  = [list(row["scenario_profit"].values()) for row in frontier]
+
+    fig, ax = plt.subplots(figsize=(9, 5))
+
+    bp = ax.boxplot(
+        data,
+        patch_artist=True,
+        widths=0.5,
+        medianprops=dict(color="black", linewidth=1.5),
+        whiskerprops=dict(linewidth=1.0),
+        capprops=dict(linewidth=1.0),
+        flierprops=dict(marker="o", markersize=2, alpha=0.3, color=color),
+    )
+
+    for patch in bp["boxes"]:
+        patch.set_facecolor(color)
+        patch.set_alpha(0.4)
+
+    # VaR line only — no E[Π] line
+    vars_ = [
+        float(np.quantile(list(row["scenario_profit"].values()), 1 - alpha))
+        for row in frontier
+    ]
+    ax.plot(
+        range(1, len(betas) + 1), vars_,
+        marker="s", markersize=4, linewidth=1.2,
+        linestyle="--", color="gray", label=rf"VaR ($\alpha={alpha}$)"
+    )
+
+    ax.set_xticks(range(1, len(betas) + 1))
+    ax.set_xticklabels([str(b) for b in betas])
+    ax.set_xlabel(r"$\beta$")
+    ax.set_ylabel(r"$\Pi_\omega$ [€]")
+    ax.set_title(title)
+    ax.legend(frameon=False)
+    ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f"€{x:,.0f}"))
+    ax.grid(axis="y", linewidth=0.4, alpha=0.5)
+    ax.spines[["top", "right"]].set_visible(False)
+
+    fig.tight_layout()
+    fig.savefig(save_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved: {save_path}") 
+
+def plot_profit_boxplot_comparison(frontier_one, frontier_two, save_path, alpha=0.9):
+    betas = [row["beta"] for row in frontier_one]
+    data_one = [list(row["scenario_profit"].values()) for row in frontier_one]
+    data_two = [list(row["scenario_profit"].values()) for row in frontier_two]
+
+    n      = len(betas)
+    x      = np.arange(n)
+    width  = 0.35
+    offset = 0.2
+
+    fig, ax = plt.subplots(figsize=(11, 5))
+
+    def draw_boxes(data, positions, color, label):
+        bp = ax.boxplot(
+            data,
+            positions=positions,
+            widths=width,
+            patch_artist=True,
+            medianprops=dict(color="black", linewidth=1.5),
+            whiskerprops=dict(linewidth=1.0),
+            capprops=dict(linewidth=1.0),
+            flierprops=dict(marker="o", markersize=2, alpha=0.3, color=color),
+            manage_ticks=False,
+        )
+        for patch in bp["boxes"]:
+            patch.set_facecolor(color)
+            patch.set_alpha(0.4)
+        # proxy artist for legend
+        ax.plot([], [], color=color, linewidth=6, alpha=0.4, label=label)
+
+    draw_boxes(data_one, x - offset, "#fa9537", "one-price")
+    draw_boxes(data_two, x + offset, "#3fe60c", "two-price")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([str(b) for b in betas])
+    ax.set_xlabel(r"$\beta$")
+    ax.set_ylabel(r"$\Pi_\omega$ [€]")
+    #ax.set_title("Profit distribution vs. risk aversion — one-price vs. two-price")
+    ax.legend(frameon=False)
+    ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f"€{x:,.0f}"))
+    ax.grid(axis="y", linewidth=0.4, alpha=0.5)
+    ax.spines[["top", "right"]].set_visible(False)
+
+    fig.tight_layout()
+    fig.savefig(save_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved: {save_path}") 
+
+def plot_hourly_offers(frontier_two, wind_mw, si, scenarios, save_path):
+    hours         = list(frontier_two[0]["p_DA_values"].keys())
+    hours_display = [h + 1 for h in hours]
+    ref_wind      = [wind_mw[h].mean() for h in hours]
+
+    max_offer = max(max(row["p_DA_values"][h] for h in hours) for row in frontier_two)
+    colors    = ["#4575b4", "#74add1", "#fdae61", "#f46d43", "#d73027", "#a50026"]
+
+    fig, ax1 = plt.subplots(figsize=(12, 4.5))
+    ax2 = ax1.twinx()
+
+    for row, c in zip(frontier_two, colors):
+        offers = [row["p_DA_values"][h] for h in hours]
+        ax1.plot(hours_display, offers, marker="o", markersize=3, linewidth=1.4,
+                 color=c, label=rf"$\beta={row['beta']}$")
+
+    ax1.plot(hours_display, ref_wind, linestyle="--", linewidth=1.2,
+             color="black", label=r"$\mathbb{E}[p^{\mathrm{real}}_{t,\omega}]$")
+
+    ax1.set_xlabel("hour")
+    ax1.set_ylabel(r"$p_t^{\mathrm{DA}}$ [MW]")
+    ax1.set_xticks(hours_display)
+    ax1.set_ylim(0, max_offer * 1.15)
+    ax1.grid(axis="y", linewidth=0.4, alpha=0.5)
+    ax1.spines[["top", "right"]].set_visible(False)
+
+    ax2.set_ylim(0, 1.15)
+    ax2.set_ylabel(r"$P(\mathrm{SI}_{t,\omega})$")
+    ax2.spines[["top", "left"]].set_visible(False)
+
+    ax1.legend(frameon=False, fontsize=8, ncol=4,
+               loc="lower center", bbox_to_anchor=(0.5, 1.0))
+
+    fig.tight_layout()
+    fig.savefig(save_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved: {save_path}")
