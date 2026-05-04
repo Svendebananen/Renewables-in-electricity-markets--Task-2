@@ -69,56 +69,47 @@ def solve_cvar_gurobi(
     epsilon: float,
     output_flag: int = 0,
 ) -> float:
-    """Solve CVaR LP and return the optimal upward reserve bid."""
+    """Solve CVaR LP and return the optimal upward reserve bid.
     
+    Enforces: CVaR_{1-epsilon}(c_up - load) <= 0
+    LP reformulation: beta + (1 / (epsilon * N)) * sum(s) <= 0
+                      s[m,w] >= (c_up - load[m,w]) - beta
+                      s[m,w] >= 0
+    """
     arr, m_count, omega = _validate_inputs(profiles, epsilon)
-    total_samples = m_count * omega
+    N = m_count * omega
 
     model = gp.Model("cvar")
     model.setParam("OutputFlag", output_flag)
 
-    # Variables
+    # Decision variables
     c_up = model.addVar(lb=0.0, name="c_up")
-    beta = model.addVar(lb=-GRB.INFINITY, name="beta")  # VaR
-    zeta = model.addVars(m_count, omega, lb=0.0, name="zeta")
+    beta = model.addVar(lb=-GRB.INFINITY, name="beta")   # VaR level
+    s = model.addVars(m_count, omega, lb=0.0, name="s")  # excess shortfall above VaR
 
-    # Objective
+    # Objective: maximize the reserve bid
     model.setObjective(c_up, GRB.MAXIMIZE)
 
+    # s[m,w] >= (c_up - load[m,w]) - beta  (excess shortfall above VaR)
     model.addConstrs(
-        (
-            zeta[m, w] >= c_up - float(arr[m, w])
-            for m in range(m_count)
-            for w in range(omega)
-        ),
-        name="shortfall",
+        (s[m, w] >= c_up - float(arr[m, w]) - beta
+         for m in range(m_count)
+         for w in range(omega)),
+        name="excess_shortfall",
     )
 
-    
+    # CVaR constraint: beta + (1/epsilon) * E[s] <= 0
     model.addConstr(
-    (1.0 / (m_count * omega)) * 
-    gp.quicksum(zeta[m, w] for m in range(m_count) for w in range(omega)) 
-    <= (1 - epsilon) * beta,
-    name="Expectation Bound"
+        beta + (1.0 / (epsilon * N)) *
+        gp.quicksum(s[m, w] for m in range(m_count) for w in range(omega))
+        <= 0.0,
+        name="CVaR_bound",
     )
 
-    model.addConstrs(
-        (
-            zeta[m, w] >= beta
-            for m in range(m_count)
-            for w in range(omega)
-        ),
-        name="VaR Bound",
-    )
     model.optimize()
-
-    
     if model.status != GRB.OPTIMAL:
-        raise RuntimeError("CVar solver failed")
+        raise RuntimeError("CVaR solver failed")
 
     return float(c_up.X)
-
-    r
-
 
 
