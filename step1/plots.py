@@ -525,4 +525,62 @@ def plot_hourly_offers(frontier_two, wind_mw, si, scenarios, save_path):
     fig.tight_layout()
     fig.savefig(save_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
-    print(f"Saved: {save_path}")
+    print(f"Saved: {save_path}") 
+
+def plot_imbalance_transition(frontier_two, wind_mw, si, alpha, hours, scenarios,
+                               save_path=None):
+    import math
+
+    betas, def_pcts, sur_pcts = [], [], []
+
+    for entry in frontier_two:
+        beta        = entry["beta"]
+        profit_dict = entry["scenario_profit"]
+        p_DA_opt    = entry["p_DA_values"]
+
+        n_worst      = max(1, math.floor(round((1 - alpha) * len(scenarios), 6)))
+        worst_omegas = sorted(profit_dict, key=lambda w: profit_dict[w])[:n_worst]
+        total        = n_worst * len(hours)
+
+        n_def = sum(
+            1 for omega in worst_omegas for h in hours
+            if wind_mw.loc[omega, h] < p_DA_opt[h] and si.loc[omega, h] == 1
+        )
+        n_sur = sum(
+            1 for omega in worst_omegas for h in hours
+            if wind_mw.loc[omega, h] > p_DA_opt[h] and si.loc[omega, h] == 0
+        )
+        betas.append(beta)
+        def_pcts.append(100 * n_def / total)
+        sur_pcts.append(100 * n_sur / total)
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    y     = np.arange(len(betas))
+    h_bar = 0.5
+
+    ax.barh(y, [-d for d in def_pcts], height=h_bar,
+            color="#e05c5c", label="Penalized deficit (SI=1, wind < $p^{\\mathrm{DA}}$)")
+    ax.barh(y, sur_pcts, height=h_bar,
+            color="#5b9bd5", label="Penalized surplus (SI=0, wind > $p^{\\mathrm{DA}}$)")
+
+    ax.axvline(0, color="black", linewidth=0.8)
+    ax.set_yticks(y)
+    ax.set_yticklabels([f"β = {b:.2f}" for b in betas])
+    ax.set_xlabel("Share of worst-case hour-slots (%)")
+
+    lim = max(max(def_pcts), max(sur_pcts)) * 1.15
+    ax.set_xlim(-lim, lim)
+    ax.set_xticks(np.linspace(-lim, lim, 9))
+    ax.set_xticklabels([f"{abs(v):.0f}%" for v in np.linspace(-lim, lim, 9)])
+
+    for i, (d, s) in enumerate(zip(def_pcts, sur_pcts)):
+        ax.text(-d - 0.5, i, f"{d:.1f}%", va="center", ha="right", fontsize=8)
+        ax.text( s + 0.5, i, f"{s:.1f}%", va="center", ha="left",  fontsize=8)
+
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, 1.12),
+              ncol=2, fontsize=8, frameon=True)
+
+    plt.tight_layout()
+    if save_path:
+        fig.savefig(save_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)

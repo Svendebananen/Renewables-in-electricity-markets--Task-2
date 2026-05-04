@@ -12,7 +12,7 @@ from step1.models import (
     compute_balancing_prices_one, compute_balancing_prices_two,
     solve_one_price, solve_two_price
 )
-from step1.plots import plot_cvar_frontier_With_Both_Models, plot_profit_histogram, plot_cvar_frontier, plot_profit_boxplot, plot_profit_boxplot_comparison,plot_hourly_offers
+from step1.plots import plot_cvar_frontier_With_Both_Models, plot_profit_histogram, plot_cvar_frontier, plot_profit_boxplot, plot_profit_boxplot_comparison,plot_hourly_offers, plot_imbalance_transition
 
 ALPHA       = 0.9
 BETA_VALUES = [0.0, 0.02, 0.25, 0.5, 0.75, 1.0]
@@ -35,6 +35,10 @@ for beta in BETA_VALUES:
         SCENARIOS, prob, wind_mw, lambda_DA, lambda_B, beta=beta, alpha=ALPHA
     )
     expected_profit = sum(prob[omega] * scenario_profit[omega] for omega in SCENARIOS)
+
+    p_DA_str = "  ".join(f"h{h}:{p_DA_values[h]:.1f}" for h in HOURS)
+    print(f"  beta={beta:.2f} | E[profit]={expected_profit:,.2f} | CVaR={cvar_value:,.2f} | {p_DA_str}")
+
     frontier_one.append({
         "beta": beta,
         "expected_profit": expected_profit,
@@ -65,7 +69,9 @@ hourly_profit = {
     for h in HOURS
 }
 
-print(f"\nTotal expected profit (beta=0): {total_profit:.2f} €")
+
+
+print(f"\nTotal expected profit (beta=0): {total_profit:,.2f} €\n")
 print("Hourly offers and profits:")
 for h in HOURS:
     print(f"  Hour {h:2d}: p_DA = {p_DA_values[h]:.2f} MW, profit = {hourly_profit[h]:.2f}")
@@ -267,6 +273,13 @@ for entry in frontier_two:
             dominant = "equal"
 
         print(f"{h+1:>5} {pct_def:>9.1f}% {pct_sur:>9.1f}% {dominant:>10}")
+
+from step1.plots import plot_imbalance_transition
+
+plot_imbalance_transition(
+    frontier_two, wind_mw, si, ALPHA, HOURS, SCENARIOS,
+    save_path=PLOTS / "Task1.4_imbalance_transition.png",
+)
 
 # --- worst-scenario analysis (two-price, beta=0/1) ---
 # identify the (1-alpha) worst scenarios by profit 
