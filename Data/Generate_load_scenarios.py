@@ -23,7 +23,7 @@ LOAD_MIN = 220          # kW
 LOAD_MAX = 600          # kW
 MAX_DELTA = 35          # kW per minute
 START_TIME = datetime(2000, 1, 1, 12, 0)   # 12:00 (date is arbitrary)
-NUM_STEPS = 60          # minutes (produces 61 time points: 12:00 … 13:00)
+NUM_STEPS = 60          # minutes (produces 61 time points: 12:00 … 12:59)
 OUTPUT_FILE = "load_scenarios.csv"
 DEFAULT_SEED = 60
 
@@ -69,19 +69,6 @@ def generate_load_scenarios(
         profiles[scenario_idx, :] = [load for _, load in scenario]
 
     return profiles
-
-
-def generate_load_scnenarios(
-    num_scenarios: int = NUM_SCENARIOS,
-    num_steps: int = NUM_STEPS,
-    seed: int = DEFAULT_SEED,
-) -> np.ndarray:
-    """Compatibility wrapper for misspelled function name."""
-    return generate_load_scenarios(
-        num_scenarios=num_scenarios,
-        num_steps=num_steps,
-        seed=seed,
-    )
 
 
 def main(seed: int = DEFAULT_SEED) -> None:
