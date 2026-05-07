@@ -113,3 +113,61 @@ def solve_cvar_gurobi(
     return float(c_up.X)
 
 
+def solve_cvar_gurobi_old(
+    profiles: np.ndarray,
+    epsilon: float,
+    output_flag: int = 0,
+) -> float:
+    """Solve CVaR LP and return the optimal upward reserve bid."""
+    
+    arr, m_count, omega = _validate_inputs(profiles, epsilon)
+    total_samples = m_count * omega
+
+    model = gp.Model("cvar")
+    model.setParam("OutputFlag", output_flag)
+
+    # Variables
+    c_up = model.addVar(lb=0.0, name="c_up")
+    # beta = model.addVar(lb=-GRB.INFINITY, name="beta")  # VaR
+    # beta = model.addVar(ub=0.0, name="beta")  # VaR, with β ≤ 0
+    beta = model.addVar(lb=-GRB.INFINITY, name="beta")
+    # zeta = model.addVars(m_count, omega, lb=-GRB.INFINITY, name="zeta")
+    zeta = model.addVars(m_count, omega, lb=0.0, name="zeta")
+
+
+
+    # Objective
+    model.setObjective(c_up, GRB.MAXIMIZE)
+
+    model.addConstrs(
+        (
+            zeta[m, w] >= c_up - float(arr[m, w])
+            for m in range(m_count)
+            for w in range(omega)
+        ),
+        name="shortfall",
+    )
+
+    
+    model.addConstr(
+    (1.0 / (m_count * omega)) * 
+    gp.quicksum(zeta[m, w] for m in range(m_count) for w in range(omega)) 
+    <= (1 - epsilon) * beta,
+    name="Expectation Bound"
+    )
+
+    model.addConstrs(
+        (
+            zeta[m, w] >= beta
+            for m in range(m_count)
+            for w in range(omega)
+        ),
+        name="VaR Bound",
+    )
+    model.optimize()
+
+    
+    if model.status != GRB.OPTIMAL:
+        raise RuntimeError("CVar solver failed")
+
+    return float(c_up.X)

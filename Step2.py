@@ -2,7 +2,7 @@ import numpy as np
 import time
 import os
 import pandas as pd
-from Data.Step2_solvers import solve_also_x_gurobi, solve_cvar_gurobi
+from Data.Step2_solvers import solve_also_x_gurobi, solve_cvar_gurobi, solve_cvar_gurobi_old
 from Data.Generate_load_scenarios import generate_load_scenarios
 
 ############################################################################
@@ -24,7 +24,8 @@ def main():
     x_also = solve_also_x_gurobi(in_sample, epsilon=0.1)
     elapsed_also = time.time() - start_time
     start_time = time.time()
-    x_cvar = solve_cvar_gurobi(in_sample,   epsilon=0.1)
+    # x_cvar = solve_cvar_gurobi(in_sample,   epsilon=0.1)
+    x_cvar = solve_cvar_gurobi_old(in_sample,   epsilon=0.1)
     elapsed_cvar = time.time() - start_time
     
 
