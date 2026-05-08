@@ -489,7 +489,7 @@ def plot_profit_boxplot_comparison(frontier_one, frontier_two, save_path, alpha=
     plt.close(fig)
     print(f"Saved: {save_path}") 
 
-def plot_hourly_offers(frontier_two, wind_mw, si, scenarios, save_path):
+def plot_hourly_offers_frontier(frontier_two, wind_mw, si, scenarios, save_path):
     hours         = list(frontier_two[0]["p_DA_values"].keys())
     hours_display = [h + 1 for h in hours]
     ref_wind      = [wind_mw[h].mean() for h in hours]

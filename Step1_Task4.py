@@ -12,7 +12,7 @@ from step1.models import (
     compute_balancing_prices_one, compute_balancing_prices_two,
     solve_one_price, solve_two_price
 )
-from step1.plots import plot_cvar_frontier_With_Both_Models, plot_profit_histogram, plot_cvar_frontier, plot_profit_boxplot, plot_profit_boxplot_comparison,plot_hourly_offers, plot_imbalance_transition
+from step1.plots import plot_cvar_frontier_With_Both_Models, plot_profit_histogram, plot_cvar_frontier, plot_profit_boxplot, plot_profit_boxplot_comparison,plot_hourly_offers_frontier, plot_imbalance_transition
 
 ALPHA       = 0.9
 BETA_VALUES = [0.0, 0.02, 0.25, 0.5, 0.75, 1.0]
@@ -405,7 +405,7 @@ worst_omegas_b0 = sorted(
     key=lambda w: baseline_two["scenario_profit"][w]
 )[:max(1, math.floor(round((1 - ALPHA) * len(SCENARIOS), 6)))]
 
-plot_hourly_offers(
+plot_hourly_offers_frontier(
     frontier_two, wind_mw, si, SCENARIOS,
     save_path=PLOTS / "Task1.4_two_price_hourly_offers_diff.png",
 )

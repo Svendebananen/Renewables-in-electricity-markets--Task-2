@@ -2,7 +2,7 @@ import numpy as np
 import time
 import os
 import pandas as pd
-from Data.Step2_solvers import solve_also_x_gurobi, solve_cvar_gurobi
+from step2.Step2_solvers import solve_also_x_gurobi, solve_cvar_gurobi
 from Data.Generate_load_scenarios import generate_load_scenarios
 
 ############################################################################
@@ -68,17 +68,15 @@ def main():
     print()
 
     # 6. Save results 
-    
+    os.makedirs(os.path.join("Results", " Step 2 Outputs"), exist_ok=True)
     np.savez(
-    os.path.join("Results","Step 2", "bids_results.npz"),
+    os.path.join("Results","Step 2 Outputs", "bids_results.npz"),
     x_also=x_also,
     x_cvar=x_cvar,
     out_sample=out_sample
 )
 
     # 7. P90 sensitivity analysis (ALSO-X only)
-
-
     epsilons = np.linspace(0., 0.2, 11)  # 0.2=80%, 0.0=100%
 
     bids_also = []
@@ -141,9 +139,10 @@ def main():
         })
 
     print(results_table)   
+
    # 8. Save sensitivity results
     results_table.to_csv(
-    os.path.join("Results", "Step 2", "p90_analysis_table.csv"),
+    os.path.join("Results", "Step 2 Outputs", "p90_analysis_table.csv"),
     index=False
     )
 

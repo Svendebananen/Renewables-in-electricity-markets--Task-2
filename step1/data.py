@@ -9,7 +9,7 @@ from pathlib import Path
 # Paths
 DIR   = Path(__file__).parent.parent
 DATA  = DIR / "Data"
-PLOTS = DIR / "Step 1 Plots"
+PLOTS = DIR / "Results"/"Step 1 Plots"
 PLOTS.mkdir(parents=True, exist_ok=True)
 
 # Load raw scenarios
