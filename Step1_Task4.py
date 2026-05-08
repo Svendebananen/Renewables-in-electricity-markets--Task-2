@@ -103,6 +103,28 @@ plot_cvar_frontier(
     save_path=PLOTS / "Task1.4_one_price_profit_cvar_tradeoff.png",
 )
 
+print("\n=== One-price: gradient analysis per hour ===")
+print(f"{'hour':>5} {'grad_E':>12} {'grad_CVaR':>12} {'same_sign':>10} {'p_DA':>8}")
+
+for entry in frontier_one:
+    beta        = entry["beta"]
+    profit_dict = entry["scenario_profit"]
+    p_DA_opt    = entry["p_DA_values"]
+
+    n_worst      = max(1, math.floor(round((1 - ALPHA) * len(SCENARIOS), 6)))
+    worst_omegas = sorted(profit_dict, key=lambda w: profit_dict[w])[:n_worst]
+
+    print(f"\nbeta={beta:.2f}")
+    for h in HOURS:
+        c = {omega: lambda_DA.loc[omega, h] - lambda_B.loc[omega, h] for omega in SCENARIOS}
+
+        grad_E    = sum(prob[omega] * c[omega] for omega in SCENARIOS)
+        grad_cvar = (1 / (1 - ALPHA)) * sum(
+            prob[omega] * c[omega] for omega in worst_omegas
+        )
+        same_sign = (grad_E * grad_cvar) >= 0
+        print(f"{h+1:>5} {grad_E:>12.4f} {grad_cvar:>12.4f} {str(same_sign):>10} {p_DA_opt[h]:>8.0f}")
+
 # ---------------------------------------------------------------------------
 # Beta sweep – two-price model
 # ---------------------------------------------------------------------------
