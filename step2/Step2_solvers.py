@@ -4,11 +4,15 @@ Reusable Gurobi solver functions for Step 2 tasks.
 Import in task scripts with:
     from Step2_solvers import solve_also_x_gurobi, solve_cvar_gurobi
 
-"""
+""" 
+
 import numpy as np
 import gurobipy as gp
 from gurobipy import GRB
 
+# ---------------------------------------------------------------------------
+# Validate Inputs for Solvers
+# ---------------------------------------------------------------------------
 
 def _validate_inputs(profiles: np.ndarray, epsilon: float) -> tuple[np.ndarray, int, int]:
     """Validate common inputs and return normalized data and shape."""
@@ -24,6 +28,10 @@ def _validate_inputs(profiles: np.ndarray, epsilon: float) -> tuple[np.ndarray, 
     n_scenarios, n_minutes = arr.shape
     return arr, n_scenarios, n_minutes
 
+
+# ---------------------------------------------------------------------------
+# Solvers
+# ---------------------------------------------------------------------------
 
 def solve_also_x_gurobi(
     profiles: np.ndarray,
@@ -62,7 +70,6 @@ def solve_also_x_gurobi(
         raise RuntimeError("ALSO-X solver failed")
 
     return float(c_up.X)
-
 
 def solve_cvar_gurobi(
     profiles: np.ndarray,

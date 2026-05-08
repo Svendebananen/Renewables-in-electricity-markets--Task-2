@@ -5,7 +5,6 @@ Task 2.2): Verification of the P90 Requirement Using Out-of-Sample Analysis
 Task 2.3): Energinet Perspective
 """
 
-
 import numpy as np
 import time
 import os
