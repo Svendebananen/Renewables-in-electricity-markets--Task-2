@@ -1,7 +1,7 @@
 """
 Tasks 1.1 and 1.2:
-Task 1.1: Offering Strategy Under a One-Price Balancing Scheme
-Task 1.2: Offering Strategy Under a Two-Price Balancing Scheme
+Task 1.1): Offering Strategy Under a One-Price Balancing Scheme
+Task 1.2): Offering Strategy Under a Two-Price Balancing Scheme
 """
 
 import numpy as np

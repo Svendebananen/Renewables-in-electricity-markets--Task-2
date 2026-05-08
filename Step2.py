@@ -1,3 +1,11 @@
+"""
+Tasks 2.1, 2.2, 2.3:
+Task 2.1): In-sample Decision Making: Offering Strategy Under the P90 Requirement
+Task 2.2): Verification of the P90 Requirement Using Out-of-Sample Analysis
+Task 2.3): Energinet Perspective
+"""
+
+
 import numpy as np
 import time
 import os
@@ -5,15 +13,13 @@ import pandas as pd
 from step2.Step2_solvers import solve_also_x_gurobi, solve_cvar_gurobi
 from Data.Generate_load_scenarios import generate_load_scenarios
 
-############################################################################
-### Main execution: generate data, solve models, evaluate & save results ###
-############################################################################
+
+# Main execution: generate data, solve models, evaluate & save results
 
 def main():
     start_time = time.time()
 
     # 1. Generate and split profiles
-
     profiles   = generate_load_scenarios(num_scenarios=300, num_steps=60, seed=60)
     rng        = np.random.default_rng(0)
     perm       = rng.permutation(profiles.shape[0])
@@ -31,7 +37,8 @@ def main():
     # 3. Print optimal bids
     print("Optimal bids:")
     print(f"  ALSO-X: {x_also:.2f} kW")
-    print(f"  CVaR:   {x_cvar:.2f} kW\n")
+    print(f"  CVaR:   {x_cvar:.2f} kW\n") 
+
     # 4. Evaluate in-sample violations
     N, T = in_sample.shape
     total_minutes = N * T
@@ -119,7 +126,7 @@ def main():
         sf_out_list.append(sf_out)
         sf95_out_list.append(sf95_out)
 
-# convert
+    # convert
     bids_also = np.array(bids_also)
     violation_rate_in = np.array(violation_rate_in)
     violation_rate_out = np.array(violation_rate_out)
@@ -140,7 +147,7 @@ def main():
 
     print(results_table)   
 
-   # 8. Save sensitivity results
+    # 8. Save sensitivity results
     results_table.to_csv(
     os.path.join("Results", "Step 2 Outputs", "p90_analysis_table.csv"),
     index=False
