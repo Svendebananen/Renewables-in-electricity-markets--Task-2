@@ -12,6 +12,7 @@ from step1.data import (
 from step1.models import compute_balancing_prices_one, solve_one_price, compute_balancing_prices_two, solve_two_price
 from step1.plots import plot_Expected_DA_And_Balancing_Values, plot_Mean_Wind_And_DA_Offers, plot_profit_histogram, plot_hourly_offers, plot_hourly_offers_and_prices, plot_profit_histogram_comparison, plot_offers_and_prices_two
 
+
 # -------- Task 1 --------
 print("\n------ Task 1: One-price scheme ------")
 # compute balancing prices
@@ -95,6 +96,7 @@ plot_Expected_DA_And_Balancing_Values(
     save_path=PLOTS / "Task1.1_expected_da_and_balancing_values.png",
     color="#fa9537"
 )
+
 
 
 # -------- Task 2 --------
@@ -184,7 +186,7 @@ plot_profit_histogram_comparison(
     save_path=PLOTS / "Task1.2_profit_distribution_comparison.png"
 ) 
 
-
+# single plot with offers and prices
 plot_offers_and_prices_two(
     wind_mw, p_DA_One_Price_values, p_DA_Two_Price_values,
     expected_Two_price_DA_value, 

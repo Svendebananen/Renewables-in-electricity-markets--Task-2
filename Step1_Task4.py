@@ -70,7 +70,6 @@ hourly_profit = {
 }
 
 
-
 print(f"\nTotal expected profit (beta=0): {total_profit:,.2f} €\n")
 print("Hourly offers and profits:")
 for h in HOURS:
@@ -89,6 +88,7 @@ print(f"Minimum profit:     €{min_val:,.2f}")
 print(f"Maximum profit:     €{max_val:,.2f}")
 print(f"Median profit:      €{np.median(profits_array):.2f}")
 
+# plot profit distribution at beta=0 (one-price)
 plot_profit_histogram(
     scenario_profit, prob,
     title="Profit distribution across scenarios - One-price scheme (beta = 0)",
@@ -96,6 +96,7 @@ plot_profit_histogram(
     color="#fa9537",
 )
 
+# plot cvar frontier (one-price)
 frontier_one_df = pd.DataFrame(frontier_one)
 plot_cvar_frontier(
     frontier_one_df,
@@ -103,9 +104,9 @@ plot_cvar_frontier(
     save_path=PLOTS / "Task1.4_one_price_profit_cvar_tradeoff.png",
 )
 
+# gradient analysis of the frontier
 print("\n=== One-price: gradient analysis per hour ===")
 print(f"{'hour':>5} {'grad_E':>12} {'grad_CVaR':>12} {'same_sign':>10} {'p_DA':>8}")
-
 for entry in frontier_one:
     beta        = entry["beta"]
     profit_dict = entry["scenario_profit"]
@@ -124,6 +125,7 @@ for entry in frontier_one:
         )
         same_sign = (grad_E * grad_cvar) >= 0
         print(f"{h+1:>5} {grad_E:>12.4f} {grad_cvar:>12.4f} {str(same_sign):>10} {p_DA_opt[h]:>8.0f}")
+
 
 # ---------------------------------------------------------------------------
 # Beta sweep – two-price model
@@ -298,6 +300,7 @@ for entry in frontier_two:
 
 from step1.plots import plot_imbalance_transition
 
+# risk profile transition plot (two-price)
 plot_imbalance_transition(
     frontier_two, wind_mw, si, ALPHA, HOURS, SCENARIOS,
     save_path=PLOTS / "Task1.4_imbalance_transition.png",
