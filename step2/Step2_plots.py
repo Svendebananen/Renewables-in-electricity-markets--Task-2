@@ -1,3 +1,8 @@
+"""
+step2/Step2_plots.py
+Reusable plotting functions for Step 2 tasks.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd

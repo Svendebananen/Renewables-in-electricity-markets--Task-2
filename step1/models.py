@@ -37,7 +37,6 @@ def compute_balancing_prices_one(lambda_DA, si):
                 lambda_B.loc[omega, h] = SURPLUS_MULTIPLIER * lambda_DA.loc[omega, h]
     return lambda_B
 
-
 def compute_balancing_prices_two(lambda_DA, si):
     """
     Two-price scheme: separate up/down balancing prices per scenario/hour.
@@ -160,7 +159,6 @@ def solve_one_price(
     )
 
     return p_DA_values, scenario_profit, cvar_value, Day_Ahead_Revenue, Balancing_Revenue
-
 
 def solve_two_price(
     scenarios, prob, wind_mw, lambda_DA, lambda_B_up, lambda_B_down,

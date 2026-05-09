@@ -10,7 +10,7 @@ Constraints:
 Output: load_scenarios.csv
   Columns: Scenario, Time, Load
 """
-
+import os
 import random
 import csv
 import argparse
@@ -24,7 +24,9 @@ LOAD_MAX = 600          # kW
 MAX_DELTA = 35          # kW per minute
 START_TIME = datetime(2000, 1, 1, 12, 0)   # 12:00 (date is arbitrary)
 NUM_STEPS = 60          # minutes (produces 61 time points: 12:00 … 12:59)
-OUTPUT_FILE = "load_scenarios.csv"
+import os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_FILE = os.path.join(SCRIPT_DIR, "load_scenarios.csv")
 DEFAULT_SEED = 60
 
 

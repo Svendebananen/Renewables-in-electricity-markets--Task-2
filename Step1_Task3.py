@@ -84,6 +84,7 @@ print(f"Average in-sample DA profit: {avg_insample_da_profit:,.2f}€")
 print()
 print(results_df.to_string(index=False))
 
+# plot scatter plot and bar plot of in-sample vs out-of-sample profits 
 plot_crossvalidation(
     results_df,
     save_path_scatter=PLOTS / "Task1.3_crossvalidation_scatter.png",

@@ -12,7 +12,7 @@ from step1.models import (
     compute_balancing_prices_one, compute_balancing_prices_two,
     solve_one_price, solve_two_price
 )
-from step1.plots import plot_cvar_frontier_With_Both_Models, plot_profit_histogram, plot_cvar_frontier, plot_profit_boxplot, plot_profit_boxplot_comparison,plot_hourly_offers, plot_imbalance_transition
+from step1.plots import plot_cvar_frontier_With_Both_Models, plot_profit_histogram, plot_cvar_frontier, plot_profit_boxplot, plot_profit_boxplot_comparison,plot_hourly_offers_frontier, plot_imbalance_transition
 
 ALPHA       = 0.9
 BETA_VALUES = [0.0, 0.02, 0.25, 0.5, 0.75, 1.0]
@@ -70,7 +70,6 @@ hourly_profit = {
 }
 
 
-
 print(f"\nTotal expected profit (beta=0): {total_profit:,.2f} €\n")
 print("Hourly offers and profits:")
 for h in HOURS:
@@ -89,6 +88,7 @@ print(f"Minimum profit:     €{min_val:,.2f}")
 print(f"Maximum profit:     €{max_val:,.2f}")
 print(f"Median profit:      €{np.median(profits_array):.2f}")
 
+# plot profit distribution at beta=0 (one-price)
 plot_profit_histogram(
     scenario_profit, prob,
     title="Profit distribution across scenarios - One-price scheme (beta = 0)",
@@ -96,6 +96,7 @@ plot_profit_histogram(
     color="#fa9537",
 )
 
+# plot cvar frontier (one-price)
 frontier_one_df = pd.DataFrame(frontier_one)
 plot_cvar_frontier(
     frontier_one_df,
@@ -103,9 +104,9 @@ plot_cvar_frontier(
     save_path=PLOTS / "Task1.4_one_price_profit_cvar_tradeoff.png",
 )
 
+# gradient analysis of the frontier
 print("\n=== One-price: gradient analysis per hour ===")
 print(f"{'hour':>5} {'grad_E':>12} {'grad_CVaR':>12} {'same_sign':>10} {'p_DA':>8}")
-
 for entry in frontier_one:
     beta        = entry["beta"]
     profit_dict = entry["scenario_profit"]
@@ -124,6 +125,7 @@ for entry in frontier_one:
         )
         same_sign = (grad_E * grad_cvar) >= 0
         print(f"{h+1:>5} {grad_E:>12.4f} {grad_cvar:>12.4f} {str(same_sign):>10} {p_DA_opt[h]:>8.0f}")
+
 
 # ---------------------------------------------------------------------------
 # Beta sweep – two-price model
@@ -298,6 +300,7 @@ for entry in frontier_two:
 
 from step1.plots import plot_imbalance_transition
 
+# risk profile transition plot (two-price)
 plot_imbalance_transition(
     frontier_two, wind_mw, si, ALPHA, HOURS, SCENARIOS,
     save_path=PLOTS / "Task1.4_imbalance_transition.png",
@@ -354,13 +357,8 @@ def worst_scenario_analysis(frontier_entry, label):
 df_worst_b0 = worst_scenario_analysis(baseline_two,      "beta=0")
 df_worst_b1 = worst_scenario_analysis(frontier_two[-1],  "beta=1")
 
-plot_profit_histogram(
-    scenario_profit, prob,
-    title="Profit distribution across scenarios - Two-price scheme (beta = 0)",
-    save_path=PLOTS / "Task1.4_two_price_profit_distribution.png",
-    color="#3fe60c",
-)
 
+# frontier plot (two-price)
 frontier_two_df = pd.DataFrame(frontier_two)
 plot_cvar_frontier(
     frontier_two_df,
@@ -368,7 +366,7 @@ plot_cvar_frontier(
     save_path=PLOTS / "Task1.4_two_price_profit_cvar_tradeoff.png",
 )
 
-
+# comparison of frontiers (one-price vs two-price)
 plot_cvar_frontier_With_Both_Models(
     frontier_one_df, frontier_two_df, None, PLOTS / "Task1.4_both_models_profit_cvar_tradeoff.png"
 ) 
@@ -381,13 +379,14 @@ plot_profit_histogram(
     color="#4CAF50"
 ) 
 
+# profit boxplot across scenarios for different beta values (one-price)
 plot_profit_boxplot(
     frontier_one,
     color="#fa9537",
     title="Profit distribution vs. risk aversion — one-price scheme",
     save_path=PLOTS / "Task1.4_one_price_boxplot.png",
 )
-
+# profit boxplot across scenarios for different beta values (two-price)
 plot_profit_boxplot(
     frontier_two,
     color="#3fe60c",
@@ -395,17 +394,20 @@ plot_profit_boxplot(
     save_path=PLOTS / "Task1.4_two_price_boxplot.png",
 ) 
 
+# single plot with bockplots for both models
 plot_profit_boxplot_comparison(
     frontier_one, frontier_two,
     save_path=PLOTS / "Task1.4_boxplot_comparison.png",
 ) 
 
+# worst scenarios for profit (used to analyse the change of hourly offers when increasing beta)
 worst_omegas_b0 = sorted(
     baseline_two["scenario_profit"],
     key=lambda w: baseline_two["scenario_profit"][w]
 )[:max(1, math.floor(round((1 - ALPHA) * len(SCENARIOS), 6)))]
 
-plot_hourly_offers(
+# plot hourly offers for different beta values (two-price)
+plot_hourly_offers_frontier(
     frontier_two, wind_mw, si, SCENARIOS,
     save_path=PLOTS / "Task1.4_two_price_hourly_offers_diff.png",
 )
