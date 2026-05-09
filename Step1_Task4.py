@@ -306,6 +306,37 @@ for entry in frontier_two:
 
         print(f"{h+1:>5} {pct_def:>9.1f}% {pct_sur:>9.1f}% {dominant:>10}")
 
+# two-price gradient analysis
+print("\n=== Two-price: gradient analysis per hour ===")
+print(f"{'hour':>5} {'grad_E':>12} {'grad_CVaR':>12} {'same_sign':>10} {'p_DA':>8}")
+
+for entry in frontier_two:
+    beta        = entry["beta"]
+    profit_dict = entry["scenario_profit"]
+    p_DA_opt    = entry["p_DA_values"]
+
+    n_worst      = max(1, math.floor(round((1 - ALPHA) * len(SCENARIOS), 6)))
+    worst_omegas = sorted(profit_dict, key=lambda w: profit_dict[w])[:n_worst]
+
+    print(f"\nbeta={beta:.2f}")
+    for h in HOURS:
+        def grad_profit(omega, h=h):
+            w = wind_mw.loc[omega, h]
+            p = p_DA_opt[h]
+            if w < p:
+                return lambda_DA.loc[omega, h] - lambda_B_down.loc[omega, h]
+            elif w > p:
+                return lambda_DA.loc[omega, h] - lambda_B_up.loc[omega, h]
+            else:
+                return lambda_DA.loc[omega, h]
+
+        grad_E    = sum(prob[omega] * grad_profit(omega) for omega in SCENARIOS)
+        grad_cvar = (1 / (1 - ALPHA)) * sum(
+            prob[omega] * grad_profit(omega) for omega in worst_omegas
+        )
+        same_sign = (grad_E * grad_cvar) >= 0
+        print(f"{h+1:>5} {grad_E:>12.4f} {grad_cvar:>12.4f} {str(same_sign):>10} {p_DA_opt[h]:>8.0f}")
+
 from step1.plots import plot_imbalance_transition
 
 print("\n=== Solve times summary ===")
@@ -322,7 +353,6 @@ plot_imbalance_transition(
 )
 
 # --- worst-scenario analysis (two-price, beta=0/1) ---
-# identify the (1-alpha) worst scenarios by profit 
 def worst_scenario_analysis(frontier_entry, label):
     profit_dict = frontier_entry["scenario_profit"]
     p_DA_opt    = frontier_entry["p_DA_values"]
@@ -369,9 +399,9 @@ def worst_scenario_analysis(frontier_entry, label):
     print(f"Avg DA price [€/MWh]:{df['lda'].mean():.1f}")
 
     return df
+
 df_worst_b0 = worst_scenario_analysis(baseline_two,      "beta=0")
 df_worst_b1 = worst_scenario_analysis(frontier_two[-1],  "beta=1")
-
 
 # frontier plot (two-price)
 frontier_two_df = pd.DataFrame(frontier_two)
@@ -384,7 +414,7 @@ plot_cvar_frontier(
 # comparison of frontiers (one-price vs two-price)
 plot_cvar_frontier_With_Both_Models(
     frontier_one_df, frontier_two_df, None, PLOTS / "Task1.4_both_models_profit_cvar_tradeoff.png"
-) 
+)
 
 # profit distribution at beta=1
 scenario_profit_beta1 = frontier_two[-1]["scenario_profit"]
@@ -392,7 +422,7 @@ plot_profit_histogram(
     scenario_profit_beta1, prob,
     save_path=PLOTS / "Task1.4_two_price_profit_distribution_beta1.png",
     color="#4CAF50"
-) 
+)
 
 # profit boxplot across scenarios for different beta values (one-price)
 plot_profit_boxplot(
@@ -401,21 +431,22 @@ plot_profit_boxplot(
     title="Profit distribution vs. risk aversion — one-price scheme",
     save_path=PLOTS / "Task1.4_one_price_boxplot.png",
 )
+
 # profit boxplot across scenarios for different beta values (two-price)
 plot_profit_boxplot(
     frontier_two,
     color="#3fe60c",
     title="Profit distribution vs. risk aversion — two-price scheme",
     save_path=PLOTS / "Task1.4_two_price_boxplot.png",
-) 
+)
 
-# single plot with bockplots for both models
+# single plot with boxplots for both models
 plot_profit_boxplot_comparison(
     frontier_one, frontier_two,
     save_path=PLOTS / "Task1.4_boxplot_comparison.png",
-) 
+)
 
-# worst scenarios for profit (used to analyse the change of hourly offers when increasing beta)
+# worst scenarios for profit
 worst_omegas_b0 = sorted(
     baseline_two["scenario_profit"],
     key=lambda w: baseline_two["scenario_profit"][w]

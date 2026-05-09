@@ -345,8 +345,8 @@ def plot_profit_histogram_comparison(scenario_profit_one, scenario_profit_two, p
 def plot_offers_and_prices_two(wind_mw, p_DA_one, p_DA_two, 
                                 expected_DA, expected_B_up, expected_B_down,
                                 hours, save_path=None,
-                                color_wind="#fa9537", color_one="steelblue", 
-                                color_two="darkgreen"):
+                                color_wind="#0a5be7", color_one="#fa9537", 
+                                color_two="#4CAF50"):
     """
     Two-subplot figure:
     - Top: mean wind generation + one-price and two-price DA offers (MW)
@@ -374,15 +374,15 @@ def plot_offers_and_prices_two(wind_mw, p_DA_one, p_DA_two,
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
 
     # top subplot: offers
-    ax1.plot(hours, mean_wind,  marker='o', color=color_wind, label='Mean Wind Generation (MW)')
+    ax1.plot(hours, mean_wind,  marker='o', color=color_wind, label='Expected Wind Generation (MW)')
     ax1.plot(hours, one_offers, marker='s', color=color_one,  label='One-Price DA Offer (MW)')
     ax1.plot(hours, two_offers, marker='^', color=color_two,  label='Two-Price DA Offer (MW)')
     ax1.set_ylabel('Power (MW)')
     ax1.legend(bbox_to_anchor=(0.5, 1.02), loc='lower center', ncol=3, borderaxespad=0)
 
     # bottom subplot: prices
-    ax2.plot(hours, da_prices, marker='o', color=color_one,  label='Expected DA Price (€/MWh)')
-    ax2.plot(hours, b_up,      marker='s', color=color_two,  label='Expected Balancing Up Price (€/MWh)')
+    ax2.plot(hours, da_prices, marker='o', color=color_wind,  label='Expected DA Price (€/MWh)')
+    ax2.plot(hours, b_up,      marker='s', color="#0DC6E3",  label='Expected Balancing Up Price (€/MWh)')
     ax2.plot(hours, b_down,    marker='^', color='firebrick', label='Expected Balancing Down Price (€/MWh)')
     ax2.set_ylabel('Price (€/MWh)')
     ax2.set_xlabel('Hour of Day')
