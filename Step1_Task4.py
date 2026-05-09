@@ -2,6 +2,7 @@
 Task 1.4) Risk-Averse Offering Strategy
 """
 
+import time 
 import pandas as pd
 import numpy as np
 import math
@@ -31,18 +32,21 @@ frontier_one = []
 baseline_one = None
 
 for beta in BETA_VALUES:
+    t0 = time.perf_counter()
     p_DA_values, scenario_profit, cvar_value, _, _ = solve_one_price(
         SCENARIOS, prob, wind_mw, lambda_DA, lambda_B, beta=beta, alpha=ALPHA
     )
+    solve_time = time.perf_counter() - t0
     expected_profit = sum(prob[omega] * scenario_profit[omega] for omega in SCENARIOS)
 
     p_DA_str = "  ".join(f"h{h}:{p_DA_values[h]:.1f}" for h in HOURS)
-    print(f"  beta={beta:.2f} | E[profit]={expected_profit:,.2f} | CVaR={cvar_value:,.2f} | {p_DA_str}")
+    print(f"  beta={beta:.2f} | E[profit]={expected_profit:,.2f} | CVaR={cvar_value:,.2f} | time={solve_time:.3f}s | {p_DA_str}")
 
     frontier_one.append({
         "beta": beta,
         "expected_profit": expected_profit,
         "cvar": cvar_value,
+        "solve_time": solve_time,
         "p_DA_values": p_DA_values,
         "scenario_profit": scenario_profit,
     })
@@ -135,15 +139,19 @@ frontier_two = []
 baseline_two = None
 
 for beta in BETA_VALUES:
+    t0 = time.perf_counter()
     p_DA_values, scenario_profit, cvar_value, _, _ = solve_two_price(
         SCENARIOS, prob, wind_mw, lambda_DA, lambda_B_up, lambda_B_down,
         beta=beta, alpha=ALPHA
     )
+    solve_time = time.perf_counter() - t0
     expected_profit = sum(prob[omega] * scenario_profit[omega] for omega in SCENARIOS)
+    print(f"  beta={beta:.2f} | E[profit]={expected_profit:,.2f} | CVaR={cvar_value:,.2f} | time={solve_time:.3f}s")
     frontier_two.append({
         "beta": beta,
         "expected_profit": expected_profit,
         "cvar": cvar_value,
+        "solve_time": solve_time,
         "p_DA_values": p_DA_values,
         "scenario_profit": scenario_profit,
     })
@@ -299,6 +307,13 @@ for entry in frontier_two:
         print(f"{h+1:>5} {pct_def:>9.1f}% {pct_sur:>9.1f}% {dominant:>10}")
 
 from step1.plots import plot_imbalance_transition
+
+print("\n=== Solve times summary ===")
+print(f"{'model':>12} {'beta':>6} {'time (s)':>10}")
+for entry in frontier_one:
+    print(f"{'one-price':>12} {entry['beta']:>6.2f} {entry['solve_time']:>10.3f}")
+for entry in frontier_two:
+    print(f"{'two-price':>12} {entry['beta']:>6.2f} {entry['solve_time']:>10.3f}")
 
 # risk profile transition plot (two-price)
 plot_imbalance_transition(
