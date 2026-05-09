@@ -74,7 +74,7 @@ def main():
     print()
 
     # 6. Save results 
-    os.makedirs(os.path.join("Results", " Step 2 Outputs"), exist_ok=True)
+    os.makedirs(os.path.join("Results", "Step 2 Outputs"), exist_ok=True)
     np.savez(
     os.path.join("Results","Step 2 Outputs", "bids_results.npz"),
     x_also=x_also,
