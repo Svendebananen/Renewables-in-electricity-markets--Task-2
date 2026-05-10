@@ -33,7 +33,7 @@ for fold_idx in range(N_FOLDS):
     prob_in  = prob[insample]  / prob[insample].sum()
     prob_out = prob[outsample] / prob[outsample].sum()
 
-    # ------------------------------------------------------------------ two-price
+    # -------- Two-price scheme --------
     p_DA_two, _, _, _, _ = solve_two_price(
         insample, prob_in, wind_mw, lambda_DA, lambda_B_up, lambda_B_down
     )
@@ -64,7 +64,7 @@ for fold_idx in range(N_FOLDS):
         'outsample_profit': da_profit_two + outsample_bal_two,
     })
 
-    # ------------------------------------------------------------------ one-price
+    # -------- One-price scheme --------
     p_DA_one, _, _, _, _ = solve_one_price(
         insample, prob_in, wind_mw, lambda_DA, lambda_B
     )
