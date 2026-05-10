@@ -36,7 +36,7 @@ def plot_profit_histogram(scenario_profit, prob, title=None, save_path=None, col
     plt.title(title)
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_Expected_DA_And_Balancing_Values(lambda_Balancing, lambda_One_Price_DA, hours, save_path, color="#fa9537"):
     """
@@ -54,7 +54,7 @@ def plot_Expected_DA_And_Balancing_Values(lambda_Balancing, lambda_One_Price_DA,
     plt.legend()
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_Mean_Wind_And_DA_Offers(wind_mw, p_DA_one, p_DA_two, hours, save_path=None, color="#fa9537"):
     """
@@ -88,7 +88,7 @@ def plot_Mean_Wind_And_DA_Offers(wind_mw, p_DA_one, p_DA_two, hours, save_path=N
     fig.tight_layout()
     if save_path is not None:
         plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_hourly_offers(p_DA_values, hours, save_path, title, color="#2196F3"):
     """
@@ -107,7 +107,7 @@ def plot_hourly_offers(p_DA_values, hours, save_path, title, color="#2196F3"):
     plt.ylim(0, 600)
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_cvar_frontier(frontier_df, title, save_path):
     """
@@ -133,7 +133,7 @@ def plot_cvar_frontier(frontier_df, title, save_path):
     plt.title(title)
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_cvar_frontier_With_Both_Models(frontier_single_price_df, frontier_two_price_df, title=None, save_path=None):
     """
@@ -187,7 +187,7 @@ def plot_cvar_frontier_With_Both_Models(frontier_single_price_df, frontier_two_p
     plt.tight_layout()
     if save_path is not None:
         plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_crossvalidation(results_df, save_path_scatter=None, save_path_bar=None):
     """
@@ -236,7 +236,7 @@ def plot_crossvalidation(results_df, save_path_scatter=None, save_path_bar=None)
     plt.tight_layout()
     if save_path_scatter is not None:
         plt.savefig(save_path_scatter, dpi=150)
-    plt.show()
+    #plt.show()
 
     # --- Bar plot ---
     x     = np.arange(n_folds)
@@ -255,7 +255,7 @@ def plot_crossvalidation(results_df, save_path_scatter=None, save_path_bar=None)
     plt.tight_layout()
     if save_path_bar is not None:
         plt.savefig(save_path_bar, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_hourly_offers_and_prices(p_DA_values, lambda_Balancing, lambda_DA, hours, save_path, title=None, 
                                    color_offer="#FF6B35", color_DA="steelblue", color_balancing="#4CAF50"):
@@ -295,7 +295,7 @@ def plot_hourly_offers_and_prices(p_DA_values, lambda_Balancing, lambda_DA, hour
     plt.title(title)
     fig.tight_layout()
     plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_profit_histogram_comparison(scenario_profit_one, scenario_profit_two, prob,
                                       title=None, save_path=None,
@@ -340,7 +340,7 @@ def plot_profit_histogram_comparison(scenario_profit_one, scenario_profit_two, p
     plt.tight_layout()
     if save_path is not None:
         plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_offers_and_prices_two(wind_mw, p_DA_one, p_DA_two, 
                                 expected_DA, expected_B_up, expected_B_down,
@@ -393,7 +393,7 @@ def plot_offers_and_prices_two(wind_mw, p_DA_one, p_DA_two,
     fig.tight_layout()
     if save_path is not None:
         plt.savefig(save_path, dpi=150)
-    plt.show() 
+    #plt.show() 
 
 def plot_profit_boxplot(frontier, color, title, save_path, alpha=0.9):
     betas = [row["beta"] for row in frontier]
