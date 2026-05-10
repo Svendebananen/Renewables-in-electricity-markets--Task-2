@@ -11,6 +11,7 @@ Return value for both solvers:
     scenario_profit : dict  {omega: float}
     cvar_value      : float  (CVaR at the chosen alpha level)
 """
+
 import gurobipy as gp
 from gurobipy import GRB
 from step1.data import P_NOM
@@ -46,12 +47,12 @@ def compute_balancing_prices_two(lambda_DA, si):
     lambda_B_down = lambda_DA.copy()
     for omega in lambda_DA.index:
         for h in lambda_DA.columns:
-            if si.loc[omega, h] == 1:                                    # upward need
-                lambda_B_up.loc[omega, h]   = lambda_DA.loc[omega, h]           # beneficial
+            if si.loc[omega, h] == 1:                                                       # upward need
+                lambda_B_up.loc[omega, h]   = lambda_DA.loc[omega, h]                       # beneficial
                 lambda_B_down.loc[omega, h] = DEFICIT_MULTIPLIER * lambda_DA.loc[omega, h]  # harmful
-            else:                                                         # downward need
+            else:                                                                           # downward need
                 lambda_B_up.loc[omega, h]   = SURPLUS_MULTIPLIER * lambda_DA.loc[omega, h]  # harmful
-                lambda_B_down.loc[omega, h] = lambda_DA.loc[omega, h]           # beneficial
+                lambda_B_down.loc[omega, h] = lambda_DA.loc[omega, h]                       # beneficial
     return lambda_B_up, lambda_B_down
 
 
@@ -70,12 +71,12 @@ def solve_one_price(
     ----------
     scenarios : list of scenario IDs to include
     prob      : Series of scenario probabilities (indexed by scenario ID)
-    wind_mw   : DataFrame of wind power realisations (scenarios × hours)
-    lambda_DA : DataFrame of day-ahead prices (scenarios × hours)
-    lambda_B  : DataFrame of balancing prices (scenarios × hours)
-    beta      : float in [0, 1] – weight on CVaR term (0 = pure E[profit])
-    alpha     : float in (0, 1) – CVaR confidence level
-    verbose   : bool – if True, show Gurobi solver output
+    wind_mw   : DataFrame of wind power realisations (scenarios * hours)
+    lambda_DA : DataFrame of day-ahead prices (scenarios * hours)
+    lambda_B  : DataFrame of balancing prices (scenarios * hours)
+    beta      : float in [0, 1] - weight on CVaR term (0 = pure E[profit])
+    alpha     : float in (0, 1) - CVaR confidence level
+    verbose   : bool - if True, show Gurobi solver output
 
     Returns
     -------
@@ -171,13 +172,13 @@ def solve_two_price(
     ----------
     scenarios     : list of scenario IDs to include
     prob          : Series of scenario probabilities (indexed by scenario ID)
-    wind_mw       : DataFrame of wind power realisations (scenarios × hours)
-    lambda_DA     : DataFrame of day-ahead prices (scenarios × hours)
-    lambda_B_up   : DataFrame of upward balancing prices (scenarios × hours)
-    lambda_B_down : DataFrame of downward balancing prices (scenarios × hours)
-    beta          : float in [0, 1] – weight on CVaR term
-    alpha         : float in (0, 1) – CVaR confidence level
-    verbose       : bool – if True, show Gurobi solver output
+    wind_mw       : DataFrame of wind power realisations (scenarios * hours)
+    lambda_DA     : DataFrame of day-ahead prices (scenarios * hours)
+    lambda_B_up   : DataFrame of upward balancing prices (scenarios * hours)
+    lambda_B_down : DataFrame of downward balancing prices (scenarios * hours)
+    beta          : float in [0, 1] - weight on CVaR term
+    alpha         : float in (0, 1) - CVaR confidence level
+    verbose       : bool - if True, show Gurobi solver output
 
     Returns
     -------
