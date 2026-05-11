@@ -62,7 +62,7 @@ def compute_balancing_prices_two(lambda_DA, si):
 
 def solve_one_price(
     scenarios, prob, wind_mw, lambda_DA, lambda_B,
-    *, beta=0, alpha=0.9, verbose=False
+    *, beta=0, alpha=0.9, verbose=True
 ):
     """
     Solve the one-price stochastic offering model (with optional CVaR term).
@@ -91,7 +91,7 @@ def solve_one_price(
 
     model = gp.Model("one_price")
     if not verbose:
-        model.setParam('OutputFlag', 0)
+        model.setParam('OutputFlag', 1)
 
     # Decision variables
     p_DA = model.addVars(hours, lb=0, ub=p_nom, name="p_DA")
@@ -163,7 +163,7 @@ def solve_one_price(
 
 def solve_two_price(
     scenarios, prob, wind_mw, lambda_DA, lambda_B_up, lambda_B_down,
-    *, beta=0, alpha=0.9, verbose=False
+    *, beta=0, alpha=0.9, verbose=True
 ):
     """
     Solve the two-price stochastic offering model (with optional CVaR term).
@@ -193,7 +193,7 @@ def solve_two_price(
 
     model = gp.Model("two_price")
     if not verbose:
-        model.setParam('OutputFlag', 0)
+        model.setParam('OutputFlag', 1)
 
     # Decision variables
     p_DA       = model.addVars(hours,             lb=0, ub=p_nom, name="p_DA")

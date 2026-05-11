@@ -52,7 +52,7 @@ def main():
 
         runtime = elapsed_also if name == "ALSO-X" else elapsed_cvar
 
-        print(f"  {name:6} → {violations} violations ,"
+        print(f"  {name:6} -> {violations} violations ,"
             f"violation rate: {rate:.2f}%," 
             f"Runtime: {runtime:.2f} seconds")
     print()
@@ -67,7 +67,7 @@ def main():
         rate       = violations / total_minutes * 100
         shortfall  = np.maximum(0, bid - sample).mean()
         shortfall_95 = np.percentile(np.maximum(0, bid - sample).flatten(), 95) # 95th percentile of shortfall
-        print(f"  {name:6} → {violations} violations "
+        print(f"  {name:6} -> {violations} violations "
               f"({rate:.2f}%), avg shortfall {shortfall:.2f} kW"
               f", 95th percentile shortfall {shortfall_95:.2f} kW"
               )
