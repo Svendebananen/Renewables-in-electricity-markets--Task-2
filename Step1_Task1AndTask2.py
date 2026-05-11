@@ -69,12 +69,15 @@ print(f"Minimum profit:     €{min_val:,.2f}")
 print(f"Maximum profit:     €{max_val:,.2f}")
 print(f"Median profit:      €{np.median(profits_array):.2f}")
 
+### PLOTS ###
+# plot hourly offers
 plot_hourly_offers(
     p_DA_One_Price_values, HOURS,
     title="Optimal day-ahead offers - One-price scheme",
     save_path=PLOTS / "Task1.1_hourly_offers.png",
     color="#fa9537"
 )
+
 # single plot with offers and prices
 plot_hourly_offers_and_prices(
     p_DA_One_Price_values, expected_balancing_value, expected_DA_value, HOURS,
@@ -133,7 +136,6 @@ for h in HOURS:
 
 
 # expected day ahead value and expected balancing value for each hour to determine the decision of how much to offer in the day-ahead market
-
 print("\nExpected day-ahead value and expected balancing value for each hour:")
 expected_Two_price_DA_value             = {}
 expected_Two_Price_balancing_up_value   = {}
@@ -165,6 +167,7 @@ print(f"Minimum profit:     €{min_val:,.2f}")
 print(f"Maximum profit:     €{max_val:,.2f}")
 print(f"Median profit:      €{np.median(profits_array):.2f}")
 
+### PLOTS ###
 # plot profit distribution
 plot_profit_histogram(
     scenario_profit_two, prob,

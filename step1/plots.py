@@ -36,7 +36,7 @@ def plot_profit_histogram(scenario_profit, prob, title=None, save_path=None, col
     plt.title(title)
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_Expected_DA_And_Balancing_Values(lambda_Balancing, lambda_One_Price_DA, hours, save_path, color="#fa9537"):
     """
@@ -54,7 +54,7 @@ def plot_Expected_DA_And_Balancing_Values(lambda_Balancing, lambda_One_Price_DA,
     plt.legend()
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_Mean_Wind_And_DA_Offers(wind_mw, p_DA_one, p_DA_two, hours, save_path=None, color="#fa9537"):
     """
@@ -88,7 +88,7 @@ def plot_Mean_Wind_And_DA_Offers(wind_mw, p_DA_one, p_DA_two, hours, save_path=N
     fig.tight_layout()
     if save_path is not None:
         plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_hourly_offers(p_DA_values, hours, save_path, title, color="#2196F3"):
     """
@@ -107,7 +107,7 @@ def plot_hourly_offers(p_DA_values, hours, save_path, title, color="#2196F3"):
     plt.ylim(0, 600)
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_cvar_frontier(frontier_df, title, save_path):
     """
@@ -133,7 +133,7 @@ def plot_cvar_frontier(frontier_df, title, save_path):
     plt.title(title)
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_cvar_frontier_With_Both_Models(frontier_single_price_df, frontier_two_price_df, title=None, save_path=None):
     """
@@ -187,7 +187,7 @@ def plot_cvar_frontier_With_Both_Models(frontier_single_price_df, frontier_two_p
     plt.tight_layout()
     if save_path is not None:
         plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_crossvalidation(results_df, save_path_scatter=None, save_path_bar=None):
     """
@@ -236,7 +236,7 @@ def plot_crossvalidation(results_df, save_path_scatter=None, save_path_bar=None)
     plt.tight_layout()
     if save_path_scatter is not None:
         plt.savefig(save_path_scatter, dpi=150)
-    plt.show()
+    #plt.show()
 
     # --- Bar plot ---
     x     = np.arange(n_folds)
@@ -255,7 +255,7 @@ def plot_crossvalidation(results_df, save_path_scatter=None, save_path_bar=None)
     plt.tight_layout()
     if save_path_bar is not None:
         plt.savefig(save_path_bar, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_hourly_offers_and_prices(p_DA_values, lambda_Balancing, lambda_DA, hours, save_path, title=None, 
                                    color_offer="#FF6B35", color_DA="steelblue", color_balancing="#4CAF50"):
@@ -295,7 +295,7 @@ def plot_hourly_offers_and_prices(p_DA_values, lambda_Balancing, lambda_DA, hour
     plt.title(title)
     fig.tight_layout()
     plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_profit_histogram_comparison(scenario_profit_one, scenario_profit_two, prob,
                                       title=None, save_path=None,
@@ -340,13 +340,13 @@ def plot_profit_histogram_comparison(scenario_profit_one, scenario_profit_two, p
     plt.tight_layout()
     if save_path is not None:
         plt.savefig(save_path, dpi=150)
-    plt.show()
+    #plt.show()
 
 def plot_offers_and_prices_two(wind_mw, p_DA_one, p_DA_two, 
                                 expected_DA, expected_B_up, expected_B_down,
                                 hours, save_path=None,
-                                color_wind="#fa9537", color_one="steelblue", 
-                                color_two="darkgreen"):
+                                color_wind="#0a5be7", color_one="#fa9537", 
+                                color_two="#4CAF50"):
     """
     Two-subplot figure:
     - Top: mean wind generation + one-price and two-price DA offers (MW)
@@ -374,15 +374,15 @@ def plot_offers_and_prices_two(wind_mw, p_DA_one, p_DA_two,
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
 
     # top subplot: offers
-    ax1.plot(hours, mean_wind,  marker='o', color=color_wind, label='Mean Wind Generation (MW)')
+    ax1.plot(hours, mean_wind,  marker='o', color=color_wind, label='Expected Wind Generation (MW)')
     ax1.plot(hours, one_offers, marker='s', color=color_one,  label='One-Price DA Offer (MW)')
     ax1.plot(hours, two_offers, marker='^', color=color_two,  label='Two-Price DA Offer (MW)')
     ax1.set_ylabel('Power (MW)')
     ax1.legend(bbox_to_anchor=(0.5, 1.02), loc='lower center', ncol=3, borderaxespad=0)
 
     # bottom subplot: prices
-    ax2.plot(hours, da_prices, marker='o', color=color_one,  label='Expected DA Price (€/MWh)')
-    ax2.plot(hours, b_up,      marker='s', color=color_two,  label='Expected Balancing Up Price (€/MWh)')
+    ax2.plot(hours, da_prices, marker='o', color=color_wind,  label='Expected DA Price (€/MWh)')
+    ax2.plot(hours, b_up,      marker='s', color="#0DC6E3",  label='Expected Balancing Up Price (€/MWh)')
     ax2.plot(hours, b_down,    marker='^', color='firebrick', label='Expected Balancing Down Price (€/MWh)')
     ax2.set_ylabel('Price (€/MWh)')
     ax2.set_xlabel('Hour of Day')
@@ -393,7 +393,7 @@ def plot_offers_and_prices_two(wind_mw, p_DA_one, p_DA_two,
     fig.tight_layout()
     if save_path is not None:
         plt.savefig(save_path, dpi=150)
-    plt.show() 
+    #plt.show() 
 
 def plot_profit_boxplot(frontier, color, title, save_path, alpha=0.9):
     betas = [row["beta"] for row in frontier]

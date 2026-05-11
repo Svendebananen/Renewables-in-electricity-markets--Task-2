@@ -11,7 +11,7 @@ This repository automates key steps in market participation strategies for renew
 - Generates stochastic wind, price, and system imbalance scenarios using K-means clustering.
 - Evaluates optimal Day-Ahead offering strategies under One-Price and Two-Price balancing schemes.
 - Performs 8-fold cross-validation to assess the out-of-sample performance of market bids.
-- Traces the Pareto frontier of Expected Profit vs. Conditional Value-at-Risk (CVaR).
+- Traces the efficient frontier of Expected Profit vs. Conditional Value-at-Risk (CVaR).
 - Generates high-resolution (minute-level) stochastic load profiles for flexible consumption.
 - Solves joint chance-constrained optimization problems for the FCR-D UP ancillary market using Exact (ALSO-X MILP) and Convex Approximation (CVaR LP) methods.
 - Visualizes empirical compliance distributions and sensitivity analysis metrics.
@@ -67,6 +67,7 @@ To execute the Day-Ahead market analysis:
 
 ```bash
 python Step1_Task1AndTask2.py
+python Step1_Task3.py
 python Step1_Task4.py
 
 ```
@@ -75,5 +76,5 @@ To execute the Ancillary Services optimization and generate plots:
 
 ```bash
 python Step2.py
-python Step2_plots.py
+python step2\Step2_plots.py  
 

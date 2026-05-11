@@ -10,7 +10,9 @@ from pathlib import Path
 DIR   = Path(__file__).parent.parent
 DATA  = DIR / "Data"
 PLOTS = DIR / "Results"/"Step 1 Plots"
+OUTPUTS = DIR / "Results"/"Step 1 Outputs"
 PLOTS.mkdir(parents=True, exist_ok=True)
+OUTPUTS.mkdir(parents=True, exist_ok=True)
 
 # Load raw scenarios
 scenarios = pd.read_csv(DATA / "Combined_scenarios.csv")
