@@ -67,6 +67,7 @@ To execute the Day-Ahead market analysis:
 
 ```bash
 python Step1_Task1AndTask2.py
+python Step1_Task3.py
 python Step1_Task4.py
 
 ```
@@ -75,5 +76,5 @@ To execute the Ancillary Services optimization and generate plots:
 
 ```bash
 python Step2.py
-python Step2_plots.py
+python step2\Step2_plots.py  
 
