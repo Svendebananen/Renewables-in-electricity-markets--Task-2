@@ -100,8 +100,8 @@ def plot_tradeoff_offer(epsilons, bids, sf_in, sf_out):
 
 
 if __name__ == "__main__":
-    npz_data_path = os.path.join("Results", "Step 2", "bids_results.npz")
-    csv_data_path = os.path.join("Results", "Step 2", "p90_analysis_table.csv")
+    npz_data_path = os.path.join("Results", "Step 2 Outputs", "bids_results.npz")
+    csv_data_path = os.path.join("Results", "Step 2 Outputs", "p90_analysis_table.csv")
     
     if os.path.exists(npz_data_path) and os.path.exists(csv_data_path):
         
@@ -121,6 +121,6 @@ if __name__ == "__main__":
         plot_perf_risk(epsilons, sf_in, sf_out, v_in, v_out)
         plot_tradeoff_offer(epsilons, bids, sf_in, sf_out)
         
-        print("Grapsh generated")
+        print("Graphs generated")
     else:
         print("ERROR : Files not found.")
